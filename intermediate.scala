@@ -7,6 +7,13 @@ object Type {
   case class Apply(name: String, args: Seq[Type]) extends Type
 }
 
+case class CaseClass(
+  name: String, members: List[CaseClass.Member])
+object CaseClass {
+  case class Member(
+    name: String, tpe: Type, desc: Option[String])
+}
+
 case class RouteParam(
   name: Option[String],
   tpe: Type,

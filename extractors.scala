@@ -18,4 +18,11 @@ package object extractors {
     }
   }
 
+  def tpeToIntermediate(tpe: internal.ast.Type): intermediate.Type = tpe match {
+    case name: scala.meta.internal.ast.Type.Name =>
+      intermediate.Type.Name(name.value)
+    case scala.meta.internal.ast.Type.Apply(name: scala.meta.internal.ast.Type.Name, args) =>
+      intermediate.Type.Apply(name.value, args.map(tpeToIntermediate))
+  }
+
 }

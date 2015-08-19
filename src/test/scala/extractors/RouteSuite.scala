@@ -7,7 +7,7 @@ class RouteSuite extends FunSuite {
   lazy val parsed = {
     import scala.meta._
     import scala.meta.dialects.Scala211
-    Fixture.code.parse[Source]
+    Fixture.routeCode.parse[Source]
   }
 
   test("parse successfully") {

@@ -11,24 +11,19 @@ package object route {
 
     import scala.meta.internal.ast._
 
-    val routesTerms: List[Term] = {
-      val Source(Seq(pkg)) = source
-      val Pkg(pkgRef, pkgStats) = pkg
-      pkgStats.collect { case x: Defn.Trait => x }.toList.flatMap { trait_ =>
-        trait_.templ.stats.get.collect {
-          case x: Defn.Val if x.mods.collectFirst {
-            case Mod.Annot(Ctor.Ref.Name("publishroute")) => ()
-          }.isDefined => x
-        } match {
-          case List(route) => 
-            val Defn.Val(_, routePats, _, routeTerm) = route
-            val Term.Block(List(routeStat : Term)) = routeTerm
-            List(routeStat)
-          case Nil =>
-            Nil
-        }
+    val routesTerms: List[Term] =
+      source.topDownBreak.collect {
+        case x: Defn.Val if x.mods.collectFirst {
+          case Mod.Annot(Ctor.Ref.Name("publishroute")) => ()
+        }.isDefined => x
+      } match {
+        case List(route) => 
+          val Defn.Val(_, routePats, _, routeTerm) = route
+          val Term.Block(List(routeStat : Term)) = routeTerm
+          List(routeStat)
+        case Nil =>
+          Nil
       }
-    }
 
     def recurse(routesTerm: Term, prefix: List[String]
       ): List[(List[String], internal.ast.Term.ApplyInfix, internal.ast.Term)] = {
@@ -51,13 +46,6 @@ package object route {
     }
 
     routesTerms.flatMap(recurse(_, Nil))
-  }
-
-  def tpeToIntermediate(tpe: internal.ast.Type): intermediate.Type = tpe match {
-    case name: scala.meta.internal.ast.Type.Name =>
-      intermediate.Type.Name(name.value)
-    case scala.meta.internal.ast.Type.Apply(name: scala.meta.internal.ast.Type.Name, args) =>
-      intermediate.Type.Apply(name.value, args.map(tpeToIntermediate))
   }
 
   def routeMatcherToTpe(name: String): internal.ast.Type = name match {

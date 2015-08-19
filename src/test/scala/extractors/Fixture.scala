@@ -1,8 +1,7 @@
 package morpheus.extractors
-package route
 
 object Fixture {
-  val code = """
+  val routeCode = """
   |package io.buildo.baseexample
 
   |import morpheus.annotation.publishroute
@@ -42,5 +41,13 @@ object Fixture {
   |    }
   |  }
   |}
+  |""".stripMargin
+
+  val modelCode = """
+  |package io.buildo.baseexample
+  |
+  |package models
+  |
+  |case class Camping(name: String, size: Int)
   |""".stripMargin
 }
