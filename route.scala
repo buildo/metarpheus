@@ -5,6 +5,24 @@ import scala.meta._
 import scala.meta.dialects.Scala211
 
 package object route {
+
+  def extractAliases(source: scala.meta.Source
+    ): Map[String, (internal.ast.Term, Option[String])] = {
+
+    import scala.meta.internal.ast._
+
+    source.topDownBreak.collect {
+      case x: Defn.Val if x.mods.collectFirst {
+        case Mod.Annot(Ctor.Ref.Name("alias")) => ()
+      }.isDefined => x
+    }.map { case Defn.Val(
+        _,
+        List(Pat.Var.Term(Term.Name(name))),
+        _,
+        term: Term
+      ) => (name, (term, None))
+    }.toMap
+  }
   
   def extractRouteTerms(source: scala.meta.Source
     ): List[(List[String], internal.ast.Term.ApplyInfix, internal.ast.Term)] = {
@@ -64,7 +82,10 @@ package object route {
       }
   }
 
-  def extractRoute(route: (List[String], internal.ast.Term.ApplyInfix, internal.ast.Term)) = {
+  def extractRoute(
+    aliases: Map[String, (internal.ast.Term, Option[String])])(
+    route: (List[String], internal.ast.Term.ApplyInfix, internal.ast.Term)) = {
+
     import scala.meta.internal.ast._
 
     val (prefix, rtpe, rterm) = route
@@ -129,34 +150,39 @@ package object route {
         desc = desc)
     }
 
-    val dirOut: List[DirOut] = rdirs.flatMap {
-      case Term.Name(method) if List("get", "post").contains(method) =>
-        List(Method(method))
-      case Term.Apply(Term.Name("parameters"), paramTerms: List[Term]) =>
-        paramTerms.map {
-          case Term.Select(applyType: Term.ApplyType, Term.Name("?")) =>
-            Param(extractParamTerm(applyType, true))
-          case applyType: Term.ApplyType =>
-            Param(extractParamTerm(applyType, false))
-        }
-      case Term.Name("pathEnd") =>
-        List(Route(Nil))
-      case Term.Apply(Term.Name("path"), List(pathTerm: Term)) =>
-        val route = getAllInfix(pathTerm, "/").map {
-          case Term.Name(segmentMatcher) =>
-            intermediate.RouteSegment.Param(intermediate.RouteParam(
-              name = None,
-              tpe = (routeMatcherToTpe _).andThen(tpeToIntermediate _)(segmentMatcher),
-              required = true,
-              desc = None))
-          case Lit.String(stringSegm) =>
-            intermediate.RouteSegment.String(stringSegm)
-        }
-        List(Route(route))
-      case Term.Apply(Term.Name("entity"), List(Term.ApplyType(Term.Name("as"), List(tpe: internal.ast.Type)))) =>
-        List(Body(intermediate.Route.Body(
-          tpeToIntermediate(tpe),
-          None)))
+    val dirOut: List[DirOut] = rdirs.flatMap { term =>
+      def extract(t: Term): List[DirOut] = t match {
+        case Term.Name(method) if List("get", "post").contains(method) =>
+          List(Method(method))
+        case Term.Apply(Term.Name("parameters" | "parameter"), paramTerms: List[Term]) =>
+          paramTerms.map {
+            case Term.Select(applyType: Term.ApplyType, Term.Name("?")) =>
+              Param(extractParamTerm(applyType, true))
+            case applyType: Term.ApplyType =>
+              Param(extractParamTerm(applyType, false))
+          }
+        case Term.Name("pathEnd") =>
+          List(Route(Nil))
+        case Term.Apply(Term.Name("path"), List(pathTerm: Term)) =>
+          val route = getAllInfix(pathTerm, "/").map {
+            case Term.Name(segmentMatcher) =>
+              intermediate.RouteSegment.Param(intermediate.RouteParam(
+                name = None,
+                tpe = (routeMatcherToTpe _).andThen(tpeToIntermediate _)(segmentMatcher),
+                required = true,
+                desc = None))
+            case Lit.String(stringSegm) =>
+              intermediate.RouteSegment.String(stringSegm)
+          }
+          List(Route(route))
+        case Term.Apply(Term.Name("entity"), List(Term.ApplyType(Term.Name("as"), List(tpe: internal.ast.Type)))) =>
+          List(Body(intermediate.Route.Body(
+            tpeToIntermediate(tpe),
+            None)))
+        case Term.Name(name) if aliases.contains(name) =>
+          extract(aliases(name)._1)
+      }
+      extract(term)
     }
 
     val Term.Apply(
@@ -191,7 +217,9 @@ package object route {
 
   }
 
-  def extractAllRoutes(f: scala.meta.Source): List[intermediate.Route] =
-    extractRouteTerms(f).map(extractRoute _)
+  def extractAllRoutes(f: scala.meta.Source): List[intermediate.Route] = {
+    val aliases = extractAliases(f)
+    extractRouteTerms(f).map(extractRoute(aliases) _)
+  }
 
 }

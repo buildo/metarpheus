@@ -4,7 +4,7 @@ object Fixture {
   val routeCode = """
   |package io.buildo.baseexample
 
-  |import morpheus.annotation.publishroute
+  |import morpheus.annotation.{publishroute, alias}
 
   |import models._
 
@@ -24,6 +24,9 @@ object Fixture {
   |  import ExampleJsonProtocol._
   |  import RouterHelpers._
 
+  |  /** whether there's a beach */
+  |  @alias val `?hasBeach` = parameter('hasBeach.as[Boolean])
+
   |  @publishroute
   |  val campingRoute = {
   |    pathPrefix("campings") {
@@ -35,6 +38,9 @@ object Fixture {
   |      (get & path(IntNumber) /**
   |        get a camping by id
   |      */) (returns[Camping].ctrl(campingController.getById _)) ~
+  |      (get & pathEnd & `?hasBeach` /**
+  |        get campings based on whether they're close to a beach
+  |      */) (returns[List[Camping]].ctrl(campingController.getByHasBeach _)) ~
   |      (post & pathEnd & entity(as[Camping]) /**
   |        create a camping
   |      */) (returns[Camping].ctrl(campingController.create _))

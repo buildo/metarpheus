@@ -63,6 +63,24 @@ class RouteSuite extends FunSuite {
           desc = Some("get a camping by id")
         ),
         Route(
+          method = "get",
+          route = List(
+            RouteSegment.String("campings")
+          ),
+          params = List(
+            RouteParam(
+              Some("hasBeach"),
+              Type.Name("Boolean"),
+              true,
+              None
+            )
+          ),
+          returns = Type.Apply("List", List(Type.Name("Camping"))),
+          body = None,
+          ctrl = List("campingController", "getByHasBeach"),
+          desc = Some("get campings based on whether they're close to a beach")
+        ),
+        Route(
           method = "post",
           route = List(
             RouteSegment.String("campings")
