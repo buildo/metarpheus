@@ -72,7 +72,7 @@ class RouteSuite extends FunSuite {
               Some("hasBeach"),
               Type.Name("Boolean"),
               true,
-              None
+              Some("whether there's a beach")
             )
           ),
           returns = Type.Apply("List", List(Type.Name("Camping"))),
