@@ -40,28 +40,49 @@ package object route {
       (name, Alias(term, comment))
     }.toMap
   }
+
+  case class RouteTermInfo(
+    pathPrefix: List[String],
+    authenticated: Boolean,
+    routeTpe: internal.ast.Term.ApplyInfix,
+    routeTerm: internal.ast.Term)
   
-  def extractRouteTerms(source: scala.meta.Source
-    ): List[(List[String], internal.ast.Term.ApplyInfix, internal.ast.Term)] = {
+  def extractRouteTerms(source: scala.meta.Source): List[RouteTermInfo] = {
 
     import scala.meta.internal.ast._
 
-    val routesTerms: List[Term] =
+    val routesTerms: List[(Term, Boolean)] = // (term, authenticated)
       source.topDownBreak.collect {
         case x: Defn.Val if x.mods.collectFirst {
-          case Mod.Annot(Ctor.Ref.Name("publishroute")) => ()
+          case Mod.Annot(
+            Ctor.Ref.Name("publishroute") |
+            Term.Apply(
+              Ctor.Ref.Name("publishroute"),
+              _
+            )
+          ) => ()
         }.isDefined => x
       } match {
         case List(route) => 
           val Defn.Val(_, routePats, _, routeTerm) = route
           val Term.Block(List(routeStat : Term)) = routeTerm
-          List(routeStat)
+          val authenticated = route.mods.collectFirst {
+            case Mod.Annot(
+              Term.Apply(
+                Ctor.Ref.Name("publishroute"),
+                appliedTo
+              )
+            ) if appliedTo.collectFirst {
+              case Term.Arg.Named(Term.Name("authenticated"), Lit.Bool(true)) => ()
+            }.isDefined => true
+          }.getOrElse(false)
+          List((routeStat, authenticated))
         case Nil =>
           Nil
       }
 
-    def recurse(routesTerm: Term, prefix: List[String]
-      ): List[(List[String], internal.ast.Term.ApplyInfix, internal.ast.Term)] = {
+    def recurse(prefix: List[String])(routesTerm: Term, authenticated: Boolean
+      ): List[RouteTermInfo] = {
 
       val routeTerms = getAllInfix(routesTerm, "~")
 
@@ -72,15 +93,20 @@ package object route {
             List(Lit.String(addPrefix))
           ),
           List(Term.Block(List(t : Term)))
-        ) => recurse(t, prefix :+ addPrefix)
+        ) => recurse(prefix :+ addPrefix)(t, authenticated)
+        case Term.Apply(
+          Term.Name("withUserAuthentication"),
+          List(Term.Block(List(Term.Select(t : Term, _))))
+        ) => recurse(prefix)(t, true)
         case Term.Apply(routeTpe : Term.ApplyInfix, List(routeTerm : Term)) =>
           List(
-            (prefix, routeTpe, routeTerm)
+            RouteTermInfo(prefix, authenticated, routeTpe, routeTerm)
           )
+        case otherwise => println(otherwise.show[Structure]); ???
       }
     }
 
-    routesTerms.flatMap(recurse(_, Nil))
+    routesTerms.flatMap(x => (recurse(Nil) _).tupled(x))
   }
 
   def routeMatcherToTpe(name: String): internal.ast.Type = name match {
@@ -101,11 +127,11 @@ package object route {
 
   def extractRoute(
     aliases: Map[String, Alias])(
-    route: (List[String], internal.ast.Term.ApplyInfix, internal.ast.Term)) = {
+    route: RouteTermInfo) = {
 
     import scala.meta.internal.ast._
 
-    val (prefix, rtpe, rterm) = route
+    val RouteTermInfo(prefix, authenticated, rtpe, rterm) = route
 
     sealed trait Tag
     case class ParamDesc(name: String, desc: String) extends Tag
@@ -226,6 +252,7 @@ package object route {
       method = dirOut.getOne({ case Method(m) => m }),
       route = segments,
       params = dirOut.collect({ case Param(p) => p }),
+      authenticated = authenticated,
       returns = tpeToIntermediate(returnTpe),
       body = dirOut.collectFirst({ case Body(b) => b }),
       ctrl = ctrl,

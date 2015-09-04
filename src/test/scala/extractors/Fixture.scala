@@ -27,7 +27,7 @@ object Fixture {
   |  /** whether there's a beach */
   |  @alias val `?hasBeach` = parameter('hasBeach.as[Boolean])
 
-  |  @publishroute
+  |  @publishroute(authenticated = false)
   |  val campingRoute = {
   |    pathPrefix("campings") {
   |      (get & pathEnd & parameters('coolness.as[String], 'size.as[Int].?) /**
@@ -35,9 +35,11 @@ object Fixture {
   |        @param coolness how cool it is
   |        @param size the number of tents
   |      */) (returns[List[Camping]].ctrl(campingController.getByCoolnessAndSize _)) ~
-  |      (get & path(IntNumber) /**
-  |        get a camping by id
-  |      */) (returns[Camping].ctrl(campingController.getById _)) ~
+  |      withUserAuthentication {
+  |        (get & path(IntNumber) /**
+  |          get a camping by id
+  |        */) (returns[Camping].ctrl(campingController.getById _)) ~
+  |      } ~
   |      (get & pathEnd & `?hasBeach` /**
   |        get campings based on whether they're close to a beach
   |      */) (returns[List[Camping]].ctrl(campingController.getByHasBeach _)) ~

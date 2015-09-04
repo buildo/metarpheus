@@ -40,6 +40,7 @@ class RouteSuite extends FunSuite {
               Some("the number of tents")
             )
           ),
+          authenticated = false,
           returns = Type.Apply("List", List(Type.Name("Camping"))),
           body = None,
           ctrl = List("campingController", "getByCoolnessAndSize"),
@@ -57,6 +58,7 @@ class RouteSuite extends FunSuite {
             ))
           ),
           params = List(),
+          authenticated = true,
           returns = Type.Name("Camping"),
           body = None,
           ctrl = List("campingController", "getById"),
@@ -75,6 +77,7 @@ class RouteSuite extends FunSuite {
               Some("whether there's a beach")
             )
           ),
+          authenticated = false,
           returns = Type.Apply("List", List(Type.Name("Camping"))),
           body = None,
           ctrl = List("campingController", "getByHasBeach"),
@@ -86,6 +89,7 @@ class RouteSuite extends FunSuite {
             RouteSegment.String("campings")
           ),
           params = List(),
+          authenticated = false,
           returns = Type.Name("Camping"),
           body = Some(Route.Body(Type.Name("Camping"),None)),
           ctrl = List("campingController", "create"),

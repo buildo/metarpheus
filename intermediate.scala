@@ -30,6 +30,7 @@ case class Route(
   method: String,
   route: List[RouteSegment],
   params: List[RouteParam],
+  authenticated: Boolean,
   returns: Type,
   body: Option[Route.Body],
   ctrl: List[String],
