@@ -6,8 +6,6 @@ import scala.meta.dialects.Scala211
 
 package object route {
 
-  case class Alias(term: internal.ast.Term, desc: Option[String])
-
   private val emptyTokens = Set(" ", "\\n", "comment")
 
   private def stripCommentMarkers(s: String) =
@@ -18,6 +16,11 @@ package object route {
       .dropWhile(_ == '*')
       .reverse
 
+  case class Alias(term: internal.ast.Term, desc: Option[String])
+
+  /**
+   * Extract aliases: directives assigned to vals for use in routes.
+   */
   def extractAliases(source: scala.meta.Source): Map[String, Alias] = {
 
     import scala.meta.internal.ast._
@@ -32,6 +35,7 @@ package object route {
         _,
         term: Term
       ) =>
+      // search for the comment associated with this definition
       val tokenIdx = source.tokens.indexOf(t.tokens(0))
       val comment = source.tokens.take(tokenIdx).reverse
         .takeWhile(c => emptyTokens.contains(c.name))
@@ -47,6 +51,27 @@ package object route {
     routeTpe: internal.ast.Term.ApplyInfix,
     routeTerm: internal.ast.Term)
   
+  /**
+   * Find a router definition in a source file and extract a list of routes to
+   * be parsed as a bundle of terms and metadata.
+   *
+   * routeTpe will contain the route directives
+   * routeTerm will contain the parameter the route directives are applied to
+   * (that is to say, the lambda to run when the route is matched).
+   *
+   * In the source:
+   *
+   * @publishroute
+   * val route = {
+   *   (<routeTpe>) (<routeTerm>) ~
+   *   (<routeTpe>) (<routeTerm>) ~
+   *   ...
+   * }
+   *
+   * prefix will contain a list of all "pathPrefix"es encountered
+   * authenticated will be true if the "authenticated" param for @publishroute
+   * is true or if a "withUserAuthentication" directive has been encountered
+   */
   def extractRouteTerms(source: scala.meta.Source): List[RouteTermInfo] = {
 
     import scala.meta.internal.ast._
@@ -109,6 +134,9 @@ package object route {
     routesTerms.flatMap(x => (recurse(Nil) _).tupled(x))
   }
 
+  /**
+   * Convert a spray route matcher to the corresponding resulting type
+   */
   def routeMatcherToTpe(name: String): internal.ast.Type = name match {
     case "IntNumber" => scala.meta.internal.ast.Type.Name("Int")
     case "Segment" => scala.meta.internal.ast.Type.Name("String")
@@ -125,18 +153,16 @@ package object route {
       }
   }
 
-  def extractRoute(
-    aliases: Map[String, Alias])(
-    route: RouteTermInfo) = {
+  private sealed trait Tag
+  private case class ParamDesc(name: String, desc: String) extends Tag
 
-    import scala.meta.internal.ast._
+  /**
+   * Extract route description and tags (such as @param) from route comment
+   */
+  private def extractDescAndTagsFromComment(
+    token: Option[scala.meta.syntactic.Token]): (Option[String], List[Tag]) =
 
-    val RouteTermInfo(prefix, authenticated, rtpe, rterm) = route
-
-    sealed trait Tag
-    case class ParamDesc(name: String, desc: String) extends Tag
-
-    val (desc, tags) = rtpe.tokens.find(_.name == "comment").map { c =>
+    token.map { c =>
       val cleanLines = stripCommentMarkers(c.code)
         .split("\n").map(_.trim.stripPrefix("*").trim)
         .filter(_ != "").toList
@@ -167,8 +193,26 @@ package object route {
       (Some(desc.mkString(" ")), getTags(Nil, tagLines))
     }.getOrElse((None, List()))
 
+  /**
+   * Extract the intermediate representation for a route from the output
+   * of extractRouteTerms
+   */
+  def extractRoute(
+    aliases: Map[String, Alias])(
+    route: RouteTermInfo): intermediate.Route = {
+
+    import scala.meta.internal.ast._
+
+    val RouteTermInfo(prefix, authenticated, rtpe, rterm) = route
+
+    val (desc, tags) = extractDescAndTagsFromComment(
+      rtpe.tokens.find(_.name == "comment"))
+
     val rdirs = getAllInfix(rtpe, "&")
 
+    /**
+     * Represents the result of interpreting a directive
+     */
     sealed trait DirOut
     case class Method(method: String) extends DirOut
     case class Param(p: intermediate.RouteParam) extends DirOut
