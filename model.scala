@@ -16,6 +16,10 @@ package object model {
     }
   }
 
+  /**
+   * Extract the intermediate representation for a case class from the output
+   * of extractCaseClassDefns
+   */
   def extractCaseClass(defn: Defn.Class): intermediate.CaseClass = {
     val className = defn.name.value
     val Ctor.Primary(_, Ctor.Ref.Name("this"), List(plist)) = defn.ctor
