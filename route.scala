@@ -160,7 +160,7 @@ package object route {
    * Extract route description and tags (such as @param) from route comment
    */
   private def extractDescAndTagsFromComment(
-    token: Option[scala.meta.syntactic.Token]): (Option[String], List[Tag]) =
+    token: Option[scala.meta.Token]): (Option[String], List[Tag]) =
 
     token.map { c =>
       val cleanLines = stripCommentMarkers(c.code)
