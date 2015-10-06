@@ -8,11 +8,17 @@ package object model {
 
   import scala.meta.internal.ast._
 
-  def extractCaseClassDefns(source: scala.meta.Source): List[Defn.Class] = {
+  case class CaseClassDefnInfo(defn: Defn.Class, commentToken: Option[scala.meta.Token])
+
+  def extractCaseClassDefns(source: scala.meta.Source): List[CaseClassDefnInfo] = {
     source.topDownBreak.collect {
       case c:Defn.Class if c.mods.collectFirst {
         case Mod.Case() => ()
       }.isDefined => c
+    }.map { cc =>
+      val tokenIdx = source.tokens.indexOf(cc.tokens(0))
+      val comment = findRelatedComment(source, cc)
+      CaseClassDefnInfo(cc, comment)
     }
   }
 
@@ -20,18 +26,25 @@ package object model {
    * Extract the intermediate representation for a case class from the output
    * of extractCaseClassDefns
    */
-  def extractCaseClass(defn: Defn.Class): intermediate.CaseClass = {
+  def extractCaseClass(caseClassDefnInfo: CaseClassDefnInfo): intermediate.CaseClass = {
+    val CaseClassDefnInfo(defn, comment) = caseClassDefnInfo
     val className = defn.name.value
     val Ctor.Primary(_, Ctor.Ref.Name("this"), List(plist)) = defn.ctor
+    val (classDesc, tags) = extractDescAndTagsFromComment(comment)
+    // FIXME fail if unmatched parameter descriptions are found
+    val paramDescs = tags.collect { case p: ParamDesc => p }
     val members = plist.map {
       case Term.Param(_, Term.Name(name), Some(tpe : scala.meta.internal.ast.Type), _) =>
         intermediate.CaseClass.Member(
           name = name,
           tpe = tpeToIntermediate(tpe),
-          desc = None // FIXME
+          desc = paramDescs.find(_.name == name).map(_.desc)
         )
     }.toList
-    intermediate.CaseClass(className, members)
+    intermediate.CaseClass(
+      name = className,
+      members = members,
+      desc = classDesc)
   }
 
   def extractModel(source: scala.meta.Source): List[intermediate.CaseClass] =
