@@ -34,4 +34,63 @@ package object extractors {
       intermediate.Type.Apply(name.value, args.map(tpeToIntermediate))
   }
 
+  private val emptyTokens = Set(" ", "\\n", "comment")
+
+  private[extractors] def stripCommentMarkers(s: String) =
+    s.stripPrefix("/")
+      .dropWhile(_ == '*')
+      .reverse
+      .stripPrefix("/")
+      .dropWhile(_ == '*')
+      .reverse
+
+  /*
+   * Search for the comment associated with this definition
+   */
+  private[extractors] def findRelatedComment(source: scala.meta.Source, t: scala.meta.internal.ast.Defn): Option[scala.meta.Token] = {
+    val tokenIdx = source.tokens.indexOf(t.tokens(0))
+    source.tokens.take(tokenIdx).reverse
+      .takeWhile(c => emptyTokens.contains(c.name))
+      .find(_.name == "comment")
+  }
+
+  private[extractors] sealed trait Tag
+  private[extractors] case class ParamDesc(name: String, desc: String) extends Tag
+
+  /**
+   * Extract route description and tags (such as @param) from route comment
+   */
+  private[extractors] def extractDescAndTagsFromComment(
+    token: Option[scala.meta.Token]): (Option[String], List[Tag]) =
+
+    token.map { c =>
+      val cleanLines = stripCommentMarkers(c.code)
+        .split("\n").map(_.trim.stripPrefix("*").trim)
+        .filter(_ != "").toList
+
+      val TagRegex = """@([^\s]+) (.*)""".r
+      val ParamRegex = """@param ([^\s]+) (.*)""".r
+
+      val (desc, tagLines) = cleanLines.span(_ match {
+        case TagRegex(_, _) => false
+        case _ => true
+      })
+
+      @annotation.tailrec
+      def getTags(acc: List[Tag], lines: List[String]): List[Tag] = lines match {
+        case Nil => acc
+        case l :: ls => {
+          val (tagls, rest) = ls.span(_ match {
+            case TagRegex(tag, rest) => false
+            case _ => true
+          })
+          val next = l match {
+            case ParamRegex(name, l1) => ParamDesc(name, (l1 :: tagls).mkString(" "))
+          }
+          getTags(acc :+ next, rest)
+        }
+      }
+
+      (Some(desc.mkString(" ")), getTags(Nil, tagLines))
+    }.getOrElse((None, List()))
 }
