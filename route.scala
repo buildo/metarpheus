@@ -6,16 +6,6 @@ import scala.meta.dialects.Scala211
 
 package object route {
 
-  private val emptyTokens = Set(" ", "\\n", "comment")
-
-  private def stripCommentMarkers(s: String) =
-    s.stripPrefix("/")
-      .dropWhile(_ == '*')
-      .reverse
-      .stripPrefix("/")
-      .dropWhile(_ == '*')
-      .reverse
-
   case class Alias(term: internal.ast.Term, desc: Option[String])
 
   /**
@@ -35,13 +25,8 @@ package object route {
         _,
         term: Term
       ) =>
-      // search for the comment associated with this definition
-      val tokenIdx = source.tokens.indexOf(t.tokens(0))
-      val comment = source.tokens.take(tokenIdx).reverse
-        .takeWhile(c => emptyTokens.contains(c.name))
-        .find(_.name == "comment")
-        .map(c => stripCommentMarkers(c.code).trim)
-      (name, Alias(term, comment))
+      val comment = findRelatedComment(source, t)
+      (name, Alias(term, comment.map(token => stripCommentMarkers(token.code).trim)))
     }.toMap
   }
 
@@ -152,46 +137,6 @@ package object route {
         case _ => throw TooManyMatches()
       }
   }
-
-  private sealed trait Tag
-  private case class ParamDesc(name: String, desc: String) extends Tag
-
-  /**
-   * Extract route description and tags (such as @param) from route comment
-   */
-  private def extractDescAndTagsFromComment(
-    token: Option[scala.meta.Token]): (Option[String], List[Tag]) =
-
-    token.map { c =>
-      val cleanLines = stripCommentMarkers(c.code)
-        .split("\n").map(_.trim.stripPrefix("*").trim)
-        .filter(_ != "").toList
-
-      val TagRegex = """@([^\s]+) (.*)""".r
-      val ParamRegex = """@param ([^\s]+) (.*)""".r
-
-      val (desc, tagLines) = cleanLines.span(_ match {
-        case TagRegex(_, _) => false
-        case _ => true
-      })
-
-      @annotation.tailrec
-      def getTags(acc: List[Tag], lines: List[String]): List[Tag] = lines match {
-        case Nil => acc
-        case l :: ls => {
-          val (tagls, rest) = ls.span(_ match {
-            case TagRegex(tag, rest) => false
-            case _ => true
-          })
-          val next = l match {
-            case ParamRegex(name, l1) => ParamDesc(name, (l1 :: tagls).mkString(" "))
-          }
-          getTags(acc :+ next, rest)
-        }
-      }
-
-      (Some(desc.mkString(" ")), getTags(Nil, tagLines))
-    }.getOrElse((None, List()))
 
   /**
    * Extract the intermediate representation for a route from the output

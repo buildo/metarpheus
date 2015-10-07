@@ -8,7 +8,7 @@ object Type {
 }
 
 case class CaseClass(
-  name: String, members: List[CaseClass.Member])
+  name: String, members: List[CaseClass.Member], desc: Option[String])
 object CaseClass {
   case class Member(
     name: String, tpe: Type, desc: Option[String])

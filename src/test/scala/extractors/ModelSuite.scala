@@ -18,11 +18,18 @@ class ModelSuite extends FunSuite {
     assert(result ===
       List(
         CaseClass(
-          "Camping",
-          List(
-            CaseClass.Member("name", Type.Name("String"), None),
-            CaseClass.Member("size", Type.Name("Int"), None)
-          )
+          name = "Camping",
+          members = List(
+            CaseClass.Member(
+              name = "name",
+              tpe = Type.Name("String"),
+              desc = Some("camping name")),
+            CaseClass.Member(
+              name = "size",
+              tpe = Type.Name("Int"),
+              desc = Some("number of tents"))
+          ),
+          desc = Some("Represents a camping site")
         )
       )
     )
