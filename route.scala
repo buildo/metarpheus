@@ -138,20 +138,36 @@ package object route {
       }
   }
 
+  case class RouteCommentInfo(desc: Option[String], paramDescs: Map[String, String], routeName: Option[List[String]])
+
+  /**
+   * Extract relevant information from the route comment.
+   */
+  def extractRouteCommentInfo(rtpe: internal.ast.Term.ApplyInfix): RouteCommentInfo = {
+    val (desc, tags) = extractDescAndTagsFromComment(
+      rtpe.tokens.find(_.name == "comment"))
+
+    val paramDescs = tags.collect { case ParamDesc(name, d) => name -> d }.toMap
+
+    val routeName = tags.collectFirst { case RouteName(name) => name }
+
+    RouteCommentInfo(desc, paramDescs, routeName)
+  }
+
   /**
    * Extract the intermediate representation for a route from the output
    * of extractRouteTerms
    */
   def extractRoute(
     aliases: Map[String, Alias])(
-    route: RouteTermInfo): intermediate.Route = {
+    route: RouteTermInfo,
+    routeCommentInfo: RouteCommentInfo): intermediate.Route = {
 
     import scala.meta.internal.ast._
 
     val RouteTermInfo(prefix, authenticated, rtpe, rterm) = route
 
-    val (desc, tags) = extractDescAndTagsFromComment(
-      rtpe.tokens.find(_.name == "comment"))
+    val RouteCommentInfo(desc, paramDescs, routeName) = routeCommentInfo
 
     val rdirs = getAllInfix(rtpe, "&")
 
@@ -172,8 +188,7 @@ package object route {
         List(paramTpe: Type)
       ) = applyType
       val name = paramSym.name
-      val desc = tags.collectFirst { case ParamDesc(`name`, d) => d }
-        .orElse(aliasDesc)
+      val desc = paramDescs.get(name).orElse(aliasDesc)
       intermediate.RouteParam(
         name = Some(name),
         tpe = tpeToIntermediate(paramTpe),
@@ -245,13 +260,18 @@ package object route {
       returns = tpeToIntermediate(returnTpe),
       body = dirOut.collectFirst({ case Body(b) => b }),
       ctrl = ctrl,
-      desc = desc)
+      desc = desc,
+      name = routeName.getOrElse(ctrl))
 
   }
 
-  def extractAllRoutes(f: scala.meta.Source): List[intermediate.Route] = {
+  def extractAllRoutes(overrides: Map[List[String], intermediate.Route])(f: scala.meta.Source): List[intermediate.Route] = {
     val aliases = extractAliases(f)
-    extractRouteTerms(f).map(extractRoute(aliases) _)
+    extractRouteTerms(f).map { routeTerm =>
+      val routeCommentInfo = extractRouteCommentInfo(routeTerm.routeTpe)
+      routeCommentInfo.routeName.flatMap(overrides.get _)
+        .getOrElse(extractRoute(aliases)(routeTerm, routeCommentInfo))
+    }
   }
 
 }
