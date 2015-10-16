@@ -34,7 +34,9 @@ case class Route(
   returns: Type,
   body: Option[Route.Body],
   ctrl: List[String],
-  desc: Option[String])
+  desc: Option[String],
+  name: List[String])
+
 object Route {
   case class Body(tpe: Type, desc: Option[String])
 }

@@ -17,7 +17,7 @@ object main {
     val parsed: List[scala.meta.Source] = files.map(extractors.parse)
 
     val routes: List[intermediate.Route] = 
-      parsed.flatMap(extractors.route.extractAllRoutes _)
+      parsed.flatMap(extractors.route.extractAllRoutes(Map()) _) // TODO: load config file with route overrides
 
     val modelsInUse: List[intermediate.Type] = {
       import intermediate._

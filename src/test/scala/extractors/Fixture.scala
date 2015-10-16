@@ -45,7 +45,11 @@ object Fixture {
   |      */) (returns[List[Camping]].ctrl(campingController.getByHasBeach _)) ~
   |      (post & pathEnd & entity(as[Camping]) /**
   |        create a camping
-  |      */) (returns[Camping].ctrl(campingController.create _))
+  |      */) (returns[Camping].ctrl(campingController.create _)) ~
+  |      (get & path("overridable") & something /**
+  |        overridable route
+  |        @name campingController.overridden
+  |      */) (returns[Camping].ctrl(campingController.something _))
   |    }
   |  }
   |}

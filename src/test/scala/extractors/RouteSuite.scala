@@ -15,9 +15,25 @@ class RouteSuite extends FunSuite {
   }
 
   test("extract routes from fixture code") {
-    val result = extractAllRoutes(parsed)
-
     import morpheus.intermediate._
+
+    val overridableOverride = Route(
+      method = "get",
+      route = List(
+        RouteSegment.String("something")
+      ),
+      params = List(),
+      authenticated = false,
+      returns = Type.Apply("List", List(Type.Name("Something"))),
+      body = None,
+      ctrl = List("campingController", "something"),
+      desc = Some("gets something"),
+      name = List("campingController", "overridden")
+    )
+    val overrides = Map(
+      List("campingController", "overridden") -> overridableOverride
+    )
+    val result = extractAllRoutes(overrides)(parsed)
 
     assert(result ===
       List(
@@ -44,7 +60,9 @@ class RouteSuite extends FunSuite {
           returns = Type.Apply("List", List(Type.Name("Camping"))),
           body = None,
           ctrl = List("campingController", "getByCoolnessAndSize"),
-          desc = Some("get campings matching the requested coolness and size")
+          desc = Some("get campings matching the requested coolness and size"),
+          name = List("campingController", "getByCoolnessAndSize")
+
         ),
         Route(
           method = "get",
@@ -62,7 +80,8 @@ class RouteSuite extends FunSuite {
           returns = Type.Name("Camping"),
           body = None,
           ctrl = List("campingController", "getById"),
-          desc = Some("get a camping by id")
+          desc = Some("get a camping by id"),
+          name = List("campingController", "getById")
         ),
         Route(
           method = "get",
@@ -81,7 +100,8 @@ class RouteSuite extends FunSuite {
           returns = Type.Apply("List", List(Type.Name("Camping"))),
           body = None,
           ctrl = List("campingController", "getByHasBeach"),
-          desc = Some("get campings based on whether they're close to a beach")
+          desc = Some("get campings based on whether they're close to a beach"),
+          name = List("campingController", "getByHasBeach")
         ),
         Route(
           method = "post",
@@ -93,8 +113,10 @@ class RouteSuite extends FunSuite {
           returns = Type.Name("Camping"),
           body = Some(Route.Body(Type.Name("Camping"),None)),
           ctrl = List("campingController", "create"),
-          desc = Some("create a camping")
-        )
+          desc = Some("create a camping"),
+          name = List("campingController", "create")
+        ),
+        overridableOverride
       )
     )
 
