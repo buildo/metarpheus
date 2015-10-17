@@ -8,5 +8,4 @@ package models
  * @param size number of tents
  */
 case class Camping(name: String, size: Int)
-""".stripMargin
 
