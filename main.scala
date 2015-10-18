@@ -30,16 +30,8 @@ object main {
 
     val api = extractors.extractFullAPI(parsed, routeOverrides).stripUnusedModels
 
-    import org.json4s._
-    import org.json4s.JsonDSL._
-    import org.json4s.jackson.JsonMethods._
-    import org.json4s.jackson.Serialization
+    println(repr.serializeAPI(api))
 
-    implicit val formats = Serialization.formats(NoTypeHints)
-
-    val json = Extraction.decompose(api)
-
-    println(pretty(json))
   }
 
 }
