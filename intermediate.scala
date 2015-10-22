@@ -40,3 +40,31 @@ case class Route(
 object Route {
   case class Body(tpe: Type, desc: Option[String])
 }
+
+case class API(
+  models: List[CaseClass],
+  routes: List[Route]) {
+
+  def stripUnusedModels: API = {
+    val modelsInUse: List[intermediate.Type] = {
+      routes.flatMap { route =>
+        route.route.collect {
+          case RouteSegment.Param(routeParam) => routeParam.tpe
+        } ++
+        route.params.map(_.tpe) ++
+        List(route.returns) ++
+        route.body.map(b => List(b.tpe)).getOrElse(Nil)
+      }
+    }
+
+    val inUseConcreteTypeNames: Set[String] = {
+      def recurse(t: intermediate.Type): List[intermediate.Type.Name] = t match {
+        case name: intermediate.Type.Name => List(name)
+        case intermediate.Type.Apply(_, args) => args.flatMap(recurse).toList
+      }
+      modelsInUse.flatMap(recurse)
+    }.map(_.name).toSet
+
+    this.copy(models = models.filter(m => inUseConcreteTypeNames.contains(m.name)))
+  }
+}

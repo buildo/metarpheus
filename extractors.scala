@@ -5,14 +5,27 @@ import scala.meta.dialects.Scala211
 
 package object extractors {
 
-  def parse(file: java.io.File): scala.meta.Source = file.parse[Source]
+  def extractFullAPI(
+    parsed: List[scala.meta.Source],
+    routeOverrides: Map[List[String], intermediate.Route]): intermediate.API = {
+
+    val models: List[intermediate.CaseClass] =
+      parsed.flatMap(extractors.model.extractModel)
+
+    val routes: List[intermediate.Route] = 
+      parsed.flatMap(extractors.route.extractAllRoutes(routeOverrides))
+
+    intermediate API(models, routes)
+  }
+
+  // shared utility functions for the extractors package
 
   /**
    * Extract all terms from a sequence of applications of an infix operator
    * (which translates to nested `ApplyInfix`es).
    * e.g. getAllInfix(t1 + t2 + t3 + t4, "+") results in List(t1, t2, t3, t4)
    */
-  def getAllInfix(ainfix: internal.ast.Term, op: String): List[internal.ast.Term] = {
+  private[extractors] def getAllInfix(ainfix: internal.ast.Term, op: String): List[internal.ast.Term] = {
     import scala.meta.internal.ast._
     ainfix match {
       case Term.ApplyInfix(subinfix: Term.ApplyInfix, Term.Name(`op`), Nil, List(term : Term)) =>
@@ -27,7 +40,7 @@ package object extractors {
    * Convert a scala-meta representation of a type to a metarpheus
    * intermediate representation
    */
-  def tpeToIntermediate(tpe: internal.ast.Type): intermediate.Type = tpe match {
+  private[extractors] def tpeToIntermediate(tpe: internal.ast.Type): intermediate.Type = tpe match {
     case name: scala.meta.internal.ast.Type.Name =>
       intermediate.Type.Name(name.value)
     case scala.meta.internal.ast.Type.Apply(name: scala.meta.internal.ast.Type.Name, args) =>
