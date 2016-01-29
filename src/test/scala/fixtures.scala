@@ -1,4 +1,4 @@
-package morpheus.extractors
+package morpheus
 
 object Fixtures {
   val models = morpheus.util.slurp("fixture/models.scala")

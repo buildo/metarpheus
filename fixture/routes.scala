@@ -20,6 +20,15 @@ trait CampingRouterModule extends io.buildo.base.MonadicCtrlRouterModule
   import ExampleJsonProtocol._
   import RouterHelpers._
 
+  /**
+   * @param coolness how cool it is
+   * @param size the number of tents
+   */
+  case class GetByQueryParams(
+    coolness: Option[String],
+    size: Int
+  )
+
   /** whether there's a beach */
   @alias val `?hasBeach` = parameter('hasBeach.as[Boolean])
 
@@ -41,7 +50,14 @@ trait CampingRouterModule extends io.buildo.base.MonadicCtrlRouterModule
       */) (returns[List[Camping]].ctrl(campingController.getByHasBeach _)) ~
       (post & pathEnd & entity(as[Camping]) /**
         create a camping
-      */) (returns[Camping].ctrl(campingController.create _))
+      */) (returns[Camping].ctrl(campingController.create _)) ~
+      (get & path("overridable") & something /**
+        overridable route
+        @name campingController.overridden
+      */) (returns[Camping].ctrl(campingController.something _)) ~
+      (get & path("by_query") & params[GetByQueryParams] /**
+        get multiple campings by params with case class
+      */) (returns[List[Camping]].ctrl(campingController.getByQuery _))
     }
   }
 }
