@@ -83,7 +83,7 @@ package object route {
                 appliedTo
               )
             ) if appliedTo.collectFirst {
-              case Term.Arg.Named(Term.Name("authenticated"), Lit.Bool(true)) => ()
+              case Term.Arg.Named(Term.Name("authenticated"), Lit(true)) => ()
             }.isDefined => true
           }.getOrElse(false)
           List((routeStat, authenticated))
@@ -100,7 +100,7 @@ package object route {
         case Term.Apply(
           Term.Apply(
             Term.Name("pathPrefix"),
-            List(Lit.String(addPrefix))
+            List(Lit(addPrefix: String))
           ),
           List(Term.Block(List(t : Term)))
         ) => recurse(prefix :+ addPrefix)(t, authenticated)
@@ -184,7 +184,7 @@ package object route {
       applyType: Term.ApplyType, optional: Boolean, aliasDesc: Option[String]): intermediate.RouteParam = {
 
       val Term.ApplyType(
-        Term.Select(Lit.Symbol(paramSym), Term.Name("as")),
+        Term.Select(Lit(paramSym: Symbol), Term.Name("as")),
         List(paramTpe: Type)
       ) = applyType
       val name = paramSym.name
@@ -217,7 +217,7 @@ package object route {
                 tpe = (routeMatcherToTpe _).andThen(tpeToIntermediate _)(segmentMatcher),
                 required = true,
                 desc = None))
-            case Lit.String(stringSegm) =>
+            case Lit(stringSegm: String) =>
               intermediate.RouteSegment.String(stringSegm)
           }
           List(Route(route))
