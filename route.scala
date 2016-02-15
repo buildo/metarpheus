@@ -159,7 +159,8 @@ package object route {
    * of extractRouteTerms
    */
   def extractRoute(
-    aliases: Map[String, Alias])(
+    aliases: Map[String, Alias],
+    models: List[intermediate.CaseClass])(
     route: RouteTermInfo,
     routeCommentInfo: RouteCommentInfo): intermediate.Route = {
 
@@ -206,6 +207,21 @@ package object route {
               Param(extractParamTerm(applyType, true, aliasDesc))
             case applyType: Term.ApplyType =>
               Param(extractParamTerm(applyType, false, aliasDesc))
+          }
+        case Term.ApplyType(Term.Name("params"), Seq(Type.Name(typeName))) =>
+          models.find(_.name == typeName).get.members.map {
+            case intermediate.CaseClass.Member(name, tpe, desc) =>
+              val (paramTpe, required) = tpe match {
+                case intermediate.Type.Apply("Option", Seq(innerTpe)) =>
+                  (innerTpe, false)
+                case _ =>
+                  (tpe, true)
+              }
+              Param(intermediate.RouteParam(
+                name = Some(name),
+                tpe = paramTpe,
+                required = required,
+                desc = desc))
           }
         case Term.Name("pathEnd") =>
           List(Route(Nil))
@@ -265,12 +281,12 @@ package object route {
 
   }
 
-  def extractAllRoutes(overrides: Map[List[String], intermediate.Route])(f: scala.meta.Source): List[intermediate.Route] = {
+  def extractAllRoutes(models: List[intermediate.CaseClass], overrides: Map[List[String], intermediate.Route])(f: scala.meta.Source): List[intermediate.Route] = {
     val aliases = extractAliases(f)
     extractRouteTerms(f).map { routeTerm =>
       val routeCommentInfo = extractRouteCommentInfo(routeTerm.routeTpe)
       routeCommentInfo.routeName.flatMap(overrides.get _)
-        .getOrElse(extractRoute(aliases)(routeTerm, routeCommentInfo))
+        .getOrElse(extractRoute(aliases, models)(routeTerm, routeCommentInfo))
     }
   }
 

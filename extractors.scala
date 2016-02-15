@@ -13,7 +13,7 @@ package object extractors {
       parsed.flatMap(extractors.model.extractModel)
 
     val routes: List[intermediate.Route] = 
-      parsed.flatMap(extractors.route.extractAllRoutes(routeOverrides))
+      parsed.flatMap(extractors.route.extractAllRoutes(models, routeOverrides))
 
     intermediate API(models, routes)
   }

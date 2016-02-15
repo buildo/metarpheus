@@ -7,7 +7,7 @@ class RouteSuite extends FunSuite {
   lazy val parsed = {
     import scala.meta._
     import scala.meta.dialects.Scala211
-    Fixture.routeCode.parse[Source]
+    morpheus.Fixtures.routes.parse[Source]
   }
 
   test("parse successfully") {
@@ -33,7 +33,8 @@ class RouteSuite extends FunSuite {
     val overrides = Map(
       List("campingController", "overridden") -> overridableOverride
     )
-    val result = extractAllRoutes(overrides)(parsed)
+    val models = model.extractModel(parsed)
+    val result = extractAllRoutes(models, overrides)(parsed)
 
     assert(result ===
       List(
@@ -116,7 +117,34 @@ class RouteSuite extends FunSuite {
           desc = Some("create a camping"),
           name = List("campingController", "create")
         ),
-        overridableOverride
+        overridableOverride,
+        Route(
+          method = "get",
+          route = List(
+            RouteSegment.String("campings"),
+            RouteSegment.String("by_query")
+          ),
+          params = List(
+            RouteParam(
+              Some("coolness"),
+              Type.Name("String"),
+              false,
+              Some("how cool it is")
+            ),
+            RouteParam(
+              Some("size"),
+              Type.Name("Int"),
+              true,
+              Some("the number of tents")
+            )
+          ),
+          authenticated = false,
+          returns = Type.Apply("List", List(Type.Name("Camping"))),
+          body = None,
+          ctrl = List("campingController", "getByQuery"),
+          desc = Some("get multiple campings by params with case class"),
+          name = List("campingController", "getByQuery")
+        )
       )
     )
 
