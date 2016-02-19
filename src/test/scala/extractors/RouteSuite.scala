@@ -34,7 +34,8 @@ class RouteSuite extends FunSuite {
       List("campingController", "overridden") -> overridableOverride
     )
     val models = model.extractModel(parsed)
-    val result = extractAllRoutes(models, overrides)(parsed)
+    val caseClasses = models.collect { case x: morpheus.intermediate.CaseClass => x }
+    val result = extractAllRoutes(caseClasses, overrides)(parsed)
 
     assert(result ===
       List(

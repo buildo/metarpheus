@@ -9,11 +9,14 @@ package object extractors {
     parsed: List[scala.meta.Source],
     routeOverrides: Map[List[String], intermediate.Route]): intermediate.API = {
 
-    val models: List[intermediate.CaseClass] =
+    val models: List[intermediate.Model] =
       parsed.flatMap(extractors.model.extractModel)
 
+    val caseClasses: List[intermediate.CaseClass] =
+      models.collect { case x: intermediate.CaseClass => x }
+
     val routes: List[intermediate.Route] = 
-      parsed.flatMap(extractors.route.extractAllRoutes(models, routeOverrides))
+      parsed.flatMap(extractors.route.extractAllRoutes(caseClasses, routeOverrides))
 
     intermediate API(models, routes)
   }

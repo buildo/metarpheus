@@ -7,11 +7,24 @@ object Type {
   case class Apply(name: String, args: Seq[Type]) extends Type
 }
 
+sealed trait Model {
+  val name: String
+}
 case class CaseClass(
-  name: String, members: List[CaseClass.Member], desc: Option[String])
+  name: String,
+  members: List[CaseClass.Member],
+  desc: Option[String]) extends Model
 object CaseClass {
   case class Member(
     name: String, tpe: Type, desc: Option[String])
+}
+
+case class CaseEnum(
+  name: String,
+  values: List[CaseEnum.Member],
+  desc: Option[String]) extends Model
+object CaseEnum {
+  case class Member(name: String, desc: Option[String])
 }
 
 case class RouteParam(
@@ -42,7 +55,7 @@ object Route {
 }
 
 case class API(
-  models: List[CaseClass],
+  models: List[Model],
   routes: List[Route]) {
 
   def stripUnusedModels: API = {
