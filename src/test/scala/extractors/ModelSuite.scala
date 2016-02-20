@@ -30,6 +30,34 @@ class ModelSuite extends FunSuite {
               desc = Some("number of tents"))
           ),
           desc = Some("Represents a camping site")
+        ),
+        CaseEnum(
+          name = "CampingLocation",
+          values = List(
+            CaseEnum.Member(
+              name = "Seaside",
+              desc = Some("Near the sea")
+            ),
+            CaseEnum.Member(
+              name = "Mountains",
+              desc = Some("High up")
+            )
+          ),
+          desc = Some("Location of the camping site")
+        ),
+        CaseEnum(
+          name = "Surface",
+          values = List(
+            CaseEnum.Member(
+              name = "Sand",
+              desc = Some("Sandy")
+            ),
+            CaseEnum.Member(
+              name = "Earth",
+              desc = Some("Dirt")
+            )
+          ),
+          desc = Some("Surface of the camping site")
         )
       )
     )
