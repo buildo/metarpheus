@@ -1,6 +1,6 @@
 package io.buildo.baseexample
 
-import morpheus.annotation.{publishroute, alias}
+import metarpheus.annotation.{publishRoute, alias}
 
 import models._
 
@@ -32,7 +32,7 @@ trait CampingRouterModule extends io.buildo.base.MonadicCtrlRouterModule
   /** whether there's a beach */
   @alias val `?hasBeach` = parameter('hasBeach.as[Boolean])
 
-  @publishroute(authenticated = false)
+  @publishRoute(authenticated = false)
   val campingRoute = {
     pathPrefix("campings") {
       (get & pathEnd & parameters('coolness.as[String], 'size.as[Int].?) /**

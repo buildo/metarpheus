@@ -46,7 +46,7 @@ package object route {
    *
    * In the source:
    *
-   * @publishroute
+   * @publishRoute
    * val route = {
    *   (<routeTpe>) (<routeTerm>) ~
    *   (<routeTpe>) (<routeTerm>) ~
@@ -54,7 +54,7 @@ package object route {
    * }
    *
    * prefix will contain a list of all "pathPrefix"es encountered
-   * authenticated will be true if the "authenticated" param for @publishroute
+   * authenticated will be true if the "authenticated" param for @publishRoute
    * is true or if a "withUserAuthentication" directive has been encountered
    */
   def extractRouteTerms(source: scala.meta.Source): List[RouteTermInfo] = {
@@ -65,9 +65,9 @@ package object route {
       source.topDownBreak.collect {
         case x: Defn.Val if x.mods.collectFirst {
           case Mod.Annot(
-            Ctor.Ref.Name("publishroute") |
+            Ctor.Ref.Name("publishRoute") |
             Term.Apply(
-              Ctor.Ref.Name("publishroute"),
+              Ctor.Ref.Name("publishRoute"),
               _
             )
           ) => ()
@@ -79,7 +79,7 @@ package object route {
           val authenticated = route.mods.collectFirst {
             case Mod.Annot(
               Term.Apply(
-                Ctor.Ref.Name("publishroute"),
+                Ctor.Ref.Name("publishRoute"),
                 appliedTo
               )
             ) if appliedTo.collectFirst {
