@@ -10,3 +10,7 @@ scalacOptions := Seq("-unchecked",
                      "-deprecation",
                      "-encoding", "utf8",
                      "-feature")
+
+bintrayOrganization := Some("buildo")
+
+licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
