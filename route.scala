@@ -73,9 +73,12 @@ package object route {
           ) => ()
         }.isDefined => x
       } match {
-        case List(route) => 
+        case List(route) =>
           val Defn.Val(_, routePats, _, routeTerm) = route
-          val Term.Block(List(routeStat : Term)) = routeTerm
+          val routeStat = routeTerm match {
+            case Term.Block(List(routeStat: Term)) => routeStat
+            case routeStat: Term.Apply => routeStat
+          }
           val authenticated = route.mods.collectFirst {
             case Mod.Annot(
               Term.Apply(
