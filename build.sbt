@@ -22,3 +22,6 @@ libraryDependencies ++= Seq(
   "org.json4s" %% "json4s-jackson" % "3.2.11"
 )
 
+bintrayOrganization := Some("buildo")
+
+licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
