@@ -1,6 +1,8 @@
 package morpheus
 package intermediate
 
+import scala.annotation.tailrec
+
 sealed trait Type
 object Type {
   case class Name(name: String) extends Type
@@ -59,7 +61,7 @@ case class API(
   routes: List[Route]) {
 
   def stripUnusedModels: API = {
-    val modelsInUse: List[intermediate.Type] = {
+    val modelsInUse: Set[intermediate.Type] = {
       routes.flatMap { route =>
         route.route.collect {
           case RouteSegment.Param(routeParam) => routeParam.tpe
@@ -68,16 +70,29 @@ case class API(
         List(route.returns) ++
         route.body.map(b => List(b.tpe)).getOrElse(Nil)
       }
-    }
+    }.toSet
 
-    val inUseConcreteTypeNames: Set[String] = {
+    def inUseConcreteTypeNames(models: Set[intermediate.Type]): Set[String] = {
       def recurse(t: intermediate.Type): List[intermediate.Type.Name] = t match {
         case name: intermediate.Type.Name => List(name)
         case intermediate.Type.Apply(_, args) => args.flatMap(recurse).toList
       }
-      modelsInUse.flatMap(recurse)
+      models.flatMap(recurse)
     }.map(_.name).toSet
 
-    this.copy(models = models.filter(m => inUseConcreteTypeNames.contains(m.name)))
+    // recursively search for types in use till fixpoint is reached
+    @tailrec
+    def fixpoint(inUse: Set[intermediate.Type]): Set[String] = {
+      val newInUse = inUse ++
+        models.filter(m => inUseConcreteTypeNames(inUse).contains(m.name)).collect {
+          case CaseClass(_, members, _) => members.map(_.tpe)
+        }.flatMap(o => o)
+      if (newInUse == inUse) inUseConcreteTypeNames(inUse)
+      else fixpoint(newInUse)
+    }
+
+    val inUseNames = fixpoint(modelsInUse)
+
+    this.copy(models = models.filter(m => inUseNames.contains(m.name)))
   }
 }
