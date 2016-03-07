@@ -17,25 +17,9 @@ class RouteSuite extends FunSuite {
   test("extract routes from fixture code") {
     import morpheus.intermediate._
 
-    val overridableOverride = Route(
-      method = "get",
-      route = List(
-        RouteSegment.String("something")
-      ),
-      params = List(),
-      authenticated = false,
-      returns = Type.Apply("List", List(Type.Name("Something"))),
-      body = None,
-      ctrl = List("campingController", "something"),
-      desc = Some("gets something"),
-      name = List("campingController", "overridden")
-    )
-    val overrides = Map(
-      List("campingController", "overridden") -> overridableOverride
-    )
     val models = model.extractModel(parsed)
     val caseClasses = models.collect { case x: morpheus.intermediate.CaseClass => x }
-    val result = extractAllRoutes(caseClasses, overrides)(parsed)
+    val result = extractAllRoutes(caseClasses, Common.overrides)(parsed)
 
     assert(result ===
       List(
@@ -118,7 +102,7 @@ class RouteSuite extends FunSuite {
           desc = Some("create a camping"),
           name = List("campingController", "create")
         ),
-        overridableOverride,
+        Common.overridableOverride,
         Route(
           method = "get",
           route = List(

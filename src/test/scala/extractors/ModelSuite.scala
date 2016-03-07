@@ -27,7 +27,11 @@ class ModelSuite extends FunSuite {
             CaseClass.Member(
               name = "size",
               tpe = Type.Name("Int"),
-              desc = Some("number of tents"))
+              desc = Some("number of tents")),
+            CaseClass.Member(
+              name = "location",
+              tpe = Type.Name("CampingLocation"),
+              desc = Some("camping location"))
           ),
           desc = Some("Represents a camping site")
         ),

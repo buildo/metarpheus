@@ -6,8 +6,9 @@ package models
  * Represents a camping site
  * @param name camping name
  * @param size number of tents
+ * @param location camping location
  */
-case class Camping(name: String, size: Int)
+case class Camping(name: String, size: Int, location: CampingLocation)
 
 /*
  * Location of the camping site
@@ -29,3 +30,4 @@ object Surface {
   /* Dirt */
   case object Earth extends Surface
 }
+
