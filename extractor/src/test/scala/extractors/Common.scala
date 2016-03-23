@@ -20,4 +20,12 @@ object Common {
     val overrides = Map(
       List("campingController", "overridden") -> overridableOverride
     )
+
+    /**
+     * Convert a spray route matcher to the corresponding resulting type
+     */
+    def routeMatcherToTpe = PartialFunction[(String, Option[Type]), Type] {
+      case ("Id", Some(x@Type.Name(_))) => Type.Apply("Id", Seq(x))
+    }
+
 }
