@@ -122,14 +122,6 @@ package object route {
     routesTerms.flatMap(x => (recurse(Nil) _).tupled(x))
   }
 
-  /**
-   * Convert a spray route matcher to the corresponding resulting type
-   */
-  def routeMatcherToTpe(name: String): internal.ast.Type = name match {
-    case "IntNumber" => scala.meta.internal.ast.Type.Name("Int")
-    case "Segment" => scala.meta.internal.ast.Type.Name("String")
-  }
-
   private case class TooFewMatches() extends Exception
   private case class TooManyMatches() extends Exception
   private implicit class ListPimp[A](list: List[A]) {
@@ -163,7 +155,8 @@ package object route {
    */
   def extractRoute(
     aliases: Map[String, Alias],
-    models: List[intermediate.CaseClass])(
+    models: List[intermediate.CaseClass],
+    routeMatcherToIntermediate: PartialFunction[(String, Option[intermediate.Type]), intermediate.Type])(
     route: RouteTermInfo,
     routeCommentInfo: RouteCommentInfo): intermediate.Route = {
 
@@ -200,6 +193,11 @@ package object route {
         desc = desc)
     }
 
+    val defaultRouteMatchers = Map(
+      "IntNumber" -> intermediate.Type.Name("Int"),
+      "Segment" -> intermediate.Type.Name("String")
+    )
+
     val dirOut: List[DirOut] = rdirs.flatMap { term =>
       def extract(t: Term, aliasDesc: Option[String]): List[DirOut] = t match {
         case Term.Name(method) if List("get", "post").contains(method) =>
@@ -233,11 +231,18 @@ package object route {
             case Term.Name(segmentMatcher) =>
               intermediate.RouteSegment.Param(intermediate.RouteParam(
                 name = None,
-                tpe = (routeMatcherToTpe _).andThen(tpeToIntermediate _)(segmentMatcher),
+                tpe = defaultRouteMatchers.get(segmentMatcher).getOrElse(
+                  routeMatcherToIntermediate((segmentMatcher, None))),
                 required = true,
                 desc = None))
             case Lit(stringSegm: String) =>
               intermediate.RouteSegment.String(stringSegm)
+            case Term.ApplyType(Term.Name(segmentMatcher), Seq(typ)) =>
+              intermediate.RouteSegment.Param(intermediate.RouteParam(
+                name = None,
+                tpe = routeMatcherToIntermediate((segmentMatcher, Some(tpeToIntermediate(typ)))),
+                required = true,
+                desc = None))
           }
           List(Route(route))
         case Term.Apply(Term.Name("entity"), List(Term.ApplyType(Term.Name("as"), List(tpe: internal.ast.Type)))) =>
@@ -285,12 +290,12 @@ package object route {
 
   }
 
-  def extractAllRoutes(models: List[intermediate.CaseClass], overrides: Map[List[String], intermediate.Route])(f: scala.meta.Source): List[intermediate.Route] = {
+  def extractAllRoutes(models: List[intermediate.CaseClass], overrides: Map[List[String], intermediate.Route], routeMatcherToIntermediate: PartialFunction[(String, Option[intermediate.Type]), intermediate.Type])(f: scala.meta.Source): List[intermediate.Route] = {
     val aliases = extractAliases(f)
     extractRouteTerms(f).map { routeTerm =>
       val routeCommentInfo = extractRouteCommentInfo(routeTerm.routeTpe)
       routeCommentInfo.routeName.flatMap(overrides.get _)
-        .getOrElse(extractRoute(aliases, models)(routeTerm, routeCommentInfo))
+        .getOrElse(extractRoute(aliases, models, routeMatcherToIntermediate)(routeTerm, routeCommentInfo))
     }
   }
 

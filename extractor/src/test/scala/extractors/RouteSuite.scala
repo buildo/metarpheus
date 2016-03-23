@@ -19,9 +19,9 @@ class RouteSuite extends FunSuite {
 
     val models = model.extractModel(parsed)
     val caseClasses = models.collect { case x: morpheus.intermediate.CaseClass => x }
-    val result = extractAllRoutes(caseClasses, Common.overrides)(parsed)
+    val result = extractAllRoutes(caseClasses, Common.overrides, Common.routeMatcherToTpe)(parsed)
 
-    assert(result ===
+    assert(result.toString ===
       List(
         Route(
           method = "get",
@@ -68,6 +68,25 @@ class RouteSuite extends FunSuite {
           ctrl = List("campingController", "getById"),
           desc = Some("get a camping by id"),
           name = List("campingController", "getById")
+        ),
+        Route(
+          method = "get",
+          route = List(
+            RouteSegment.String("campings"),
+            RouteSegment.Param(RouteParam(
+              None,
+              Type.Apply("Id", Seq(Type.Name("Camping"))),
+              true,
+              None
+            ))
+          ),
+          params = List(),
+          authenticated = true,
+          returns = Type.Name("Camping"),
+          body = None,
+          ctrl = List("campingController", "getByTypedId"),
+          desc = Some("get a camping by typed id"),
+          name = List("campingController", "getByTypedId")
         ),
         Route(
           method = "get",
@@ -130,7 +149,7 @@ class RouteSuite extends FunSuite {
           desc = Some("get multiple campings by params with case class"),
           name = List("campingController", "getByQuery")
         )
-      )
+      ).toString
     )
 
   }

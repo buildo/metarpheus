@@ -44,6 +44,9 @@ trait CampingRouterModule extends io.buildo.base.MonadicCtrlRouterModule
         (get & path(IntNumber) /**
           get a camping by id
         */) (returns[Camping].ctrl(campingController.getById _)) ~
+        (get & path(`Id`[Camping]) /**
+          get a camping by typed id
+        */) (returns[Camping].ctrl(campingController.getByTypedId _)) ~
       } ~
       (get & pathEnd & `?hasBeach` /**
         get campings based on whether they're close to a beach

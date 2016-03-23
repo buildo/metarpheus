@@ -18,8 +18,10 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.scalameta" % "scalameta" % "0.1.0-SNAPSHOT" cross CrossVersion.binary,
-  "org.scalatest" %% "scalatest" % "2.1.3" % "test",
-  "org.json4s" %% "json4s-jackson" % "3.2.11"
+  "org.rogach" %% "scallop" % "1.0.0",
+  "org.json4s" %% "json4s-jackson" % "3.2.11",
+  "com.twitter" %% "util-eval" % "6.33.0",
+  "org.scalatest" %% "scalatest" % "2.1.3" % "test"
 )
 
 bintrayOrganization := Some("buildo")
