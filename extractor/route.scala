@@ -133,7 +133,11 @@ package object route {
       }
   }
 
-  case class RouteCommentInfo(desc: Option[String], paramDescs: Map[String, String], routeName: Option[List[String]])
+  case class RouteCommentInfo(
+    desc: Option[String],
+    paramDescs: Map[String, String],
+    pathParamNamesAndDescs: List[(String, String)],
+    routeName: Option[List[String]])
 
   /**
    * Extract relevant information from the route comment.
@@ -143,10 +147,10 @@ package object route {
       rtpe.tokens.find(_.name == "comment"))
 
     val paramDescs = tags.collect { case ParamDesc(name, d) => name -> d }.toMap
-
+    val pathParamNamesAndDescs = tags.collect { case PathParamDesc(name, d) => name -> d }
     val routeName = tags.collectFirst { case RouteName(name) => name }
 
-    RouteCommentInfo(desc, paramDescs, routeName)
+    RouteCommentInfo(desc, paramDescs, pathParamNamesAndDescs, routeName)
   }
 
   /**
@@ -164,7 +168,7 @@ package object route {
 
     val RouteTermInfo(prefix, authenticated, rtpe, rterm) = route
 
-    val RouteCommentInfo(desc, paramDescs, routeName) = routeCommentInfo
+    val RouteCommentInfo(desc, paramDescs, pathParamNamesAndDescs, routeName) = routeCommentInfo
 
     val rdirs = getAllInfix(rtpe, "&")
 
@@ -244,7 +248,16 @@ package object route {
                 required = true,
                 desc = None))
           }
-          List(Route(route))
+          val result = pathParamNamesAndDescs match {
+            case Nil => route
+            case _ => (route.foldLeft((pathParamNamesAndDescs, List[intermediate.RouteSegment]())) {
+              case (((name, desc) :: pps, acc), intermediate.RouteSegment.Param(routeParam)) =>
+                (pps,
+                  acc :+ intermediate.RouteSegment.Param(routeParam.copy(name = Some(name), desc = Some(desc))))
+              case ((pps, acc), segment) => (pps, acc :+ segment)
+            })._2
+          }
+          List(Route(result))
         case Term.Apply(Term.Name("entity"), List(Term.ApplyType(Term.Name("as"), List(tpe: internal.ast.Type)))) =>
           List(Body(intermediate.Route.Body(
             tpeToIntermediate(tpe),
