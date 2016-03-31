@@ -73,6 +73,7 @@ package object extractors {
 
   private[extractors] sealed trait Tag
   private[extractors] case class ParamDesc(name: String, desc: String) extends Tag
+  private[extractors] case class PathParamDesc(name: String, desc: String) extends Tag
   private[extractors] case class RouteName(name: List[String]) extends Tag
 
   /**
@@ -88,6 +89,7 @@ package object extractors {
 
       val TagRegex = """@([^\s]+) (.*)""".r
       val ParamRegex = """@param ([^\s]+) (.*)""".r
+      val PathParamRegex = """@pathParam ([^\s]+) (.*)""".r
       val RouteNameRegex = """@name ([^\s]+)""".r
 
       val (desc, tagLines) = cleanLines.span(_ match {
@@ -105,6 +107,7 @@ package object extractors {
           })
           val next = l match {
             case ParamRegex(name, l1) => ParamDesc(name, (l1 :: tagls).mkString(" "))
+            case PathParamRegex(name, l1) => PathParamDesc(name, (l1 :: tagls).mkString(" "))
             case RouteNameRegex(name) => RouteName(name.split("""\.""").toList)
           }
           getTags(acc :+ next, rest)

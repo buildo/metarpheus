@@ -43,6 +43,7 @@ trait CampingRouterModule extends io.buildo.base.MonadicCtrlRouterModule
       withUserAuthentication {
         (get & path(IntNumber) /**
           get a camping by id
+          @pathParam id camping id
         */) (returns[Camping].ctrl(campingController.getById _)) ~
         (get & path(`Id`[Camping]) /**
           get a camping by typed id

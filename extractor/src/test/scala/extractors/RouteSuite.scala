@@ -55,10 +55,10 @@ class RouteSuite extends FunSuite {
           route = List(
             RouteSegment.String("campings"),
             RouteSegment.Param(RouteParam(
-              None,
+              Some("id"),
               Type.Name("Int"),
               true,
-              None
+              Some("camping id")
             ))
           ),
           params = List(),
