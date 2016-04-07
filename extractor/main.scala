@@ -6,6 +6,7 @@ import org.rogach.scallop._
 
 class CommandLine(args: Array[String]) extends ScallopConf(args) {
   val configPath = opt[String]("config", descr = "config file path", required = false)
+  val outputFile = opt[String]("output", descr = "output file path", required = false)
   val directories = trailArg[List[String]](required = true)
   verify()
 }
@@ -45,7 +46,19 @@ object main {
       config.routeOverrides,
       config.routeMatcherToIntermediate).stripUnusedModels
 
-    println(repr.serializeAPI(api))
+    val serializedAPI = repr.serializeAPI(api)
+
+    conf.outputFile.get.map { outputFilePath =>
+      val f = new File(outputFilePath)
+      val p = new java.io.PrintWriter(f)
+      try {
+        p.println(serializedAPI)
+      } finally {
+        p.close()
+      }
+    }
+
+    println(serializedAPI)
 
   }
 
