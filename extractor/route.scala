@@ -191,6 +191,14 @@ package object route {
         desc = desc)
     }
 
+    def extractSimpleParamTerm(name: String, aliasDesc: Option[String]): intermediate.RouteParam =
+      intermediate.RouteParam(
+        name = Some(name),
+        tpe = intermediate.Type.Name("String"),
+        required = true,
+        desc = paramDescs.get(name).orElse(aliasDesc)
+      )
+
     val defaultRouteMatchers = Map(
       "IntNumber" -> intermediate.Type.Name("Int"),
       "Segment" -> intermediate.Type.Name("String")
@@ -206,6 +214,8 @@ package object route {
               Param(extractParamTerm(applyType, true, aliasDesc))
             case applyType: Term.ApplyType =>
               Param(extractParamTerm(applyType, false, aliasDesc))
+            case Lit(sym: Symbol) => Param(extractSimpleParamTerm(sym.name, aliasDesc))
+            case Lit(name: String) => Param(extractSimpleParamTerm(name, aliasDesc))
           }
         case Term.ApplyType(Term.Name("params"), Seq(Type.Name(typeName))) =>
           models.find(_.name == typeName).get.members.map {

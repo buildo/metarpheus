@@ -40,6 +40,12 @@ class RouteSuite extends FunSuite {
               Type.Name("Int"),
               false,
               Some("the number of tents")
+            ),
+            RouteParam(
+              Some("nickname"),
+              Type.Name("String"),
+              true,
+              Some("a friendly name for the camping")
             )
           ),
           authenticated = false,

@@ -35,10 +35,11 @@ trait CampingRouterModule extends io.buildo.base.MonadicCtrlRouterModule
   @publishRoute(authenticated = false)
   val campingRoute = {
     pathPrefix("campings") {
-      (get & pathEnd & parameters('coolness.as[String], 'size.as[Int].?) /**
+      (get & pathEnd & parameters('coolness.as[String], 'size.as[Int].?, 'nickname) /**
         get campings matching the requested coolness and size
         @param coolness how cool it is
         @param size the number of tents
+        @param nickname a friendly name for the camping
       */) (returns[List[Camping]].ctrl(campingController.getByCoolnessAndSize _)) ~
       withUserAuthentication {
         (get & path(IntNumber) /**
