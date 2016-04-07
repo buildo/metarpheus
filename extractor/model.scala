@@ -6,8 +6,6 @@ import scala.meta.dialects.Scala211
 
 package object model {
 
-  import scala.meta.internal.ast._
-
   case class CaseClassDefnInfo(defn: Defn.Class, commentToken: Option[scala.meta.Token])
 
   def extractCaseClassDefns(source: scala.meta.Source): List[CaseClassDefnInfo] = {
@@ -34,7 +32,7 @@ package object model {
     // FIXME fail if unmatched parameter descriptions are found
     val paramDescs = tags.collect { case p: ParamDesc => p }
     val members = plist.map {
-      case Term.Param(_, Term.Name(name), Some(tpe : scala.meta.internal.ast.Type), _) =>
+      case Term.Param(_, Term.Name(name), Some(tpe : scala.meta.Type), _) =>
         intermediate.CaseClass.Member(
           name = name,
           tpe = tpeToIntermediate(tpe),

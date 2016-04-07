@@ -6,14 +6,12 @@ import scala.meta.dialects.Scala211
 
 package object route {
 
-  case class Alias(term: internal.ast.Term, desc: Option[String])
+  case class Alias(term: Term, desc: Option[String])
 
   /**
    * Extract aliases: directives assigned to vals for use in routes.
    */
   def extractAliases(source: scala.meta.Source): Map[String, Alias] = {
-
-    import scala.meta.internal.ast._
 
     source.topDownBreak.collect {
       case x: Defn.Val if x.mods.collectFirst {
@@ -33,8 +31,8 @@ package object route {
   case class RouteTermInfo(
     pathPrefix: List[String],
     authenticated: Boolean,
-    routeTpe: internal.ast.Term.ApplyInfix,
-    routeTerm: internal.ast.Term)
+    routeTpe: Term.ApplyInfix,
+    routeTerm: Term)
   
   /**
    * Find a router definition in a source file and extract a list of routes to
@@ -58,8 +56,6 @@ package object route {
    * is true or if a "withUserAuthentication" directive has been encountered
    */
   def extractRouteTerms(source: scala.meta.Source): List[RouteTermInfo] = {
-
-    import scala.meta.internal.ast._
 
     val routesTerms: List[(Term, Boolean)] = // (term, authenticated)
       source.topDownBreak.collect {
@@ -142,7 +138,7 @@ package object route {
   /**
    * Extract relevant information from the route comment.
    */
-  def extractRouteCommentInfo(rtpe: internal.ast.Term.ApplyInfix): RouteCommentInfo = {
+  def extractRouteCommentInfo(rtpe: Term.ApplyInfix): RouteCommentInfo = {
     val (desc, tags) = extractDescAndTagsFromComment(
       rtpe.tokens.find(_.name == "comment"))
 
@@ -163,8 +159,6 @@ package object route {
     routeMatcherToIntermediate: PartialFunction[(String, Option[intermediate.Type]), intermediate.Type])(
     route: RouteTermInfo,
     routeCommentInfo: RouteCommentInfo): intermediate.Route = {
-
-    import scala.meta.internal.ast._
 
     val RouteTermInfo(prefix, authenticated, rtpe, rterm) = route
 
@@ -258,7 +252,7 @@ package object route {
             })._2
           }
           List(Route(result))
-        case Term.Apply(Term.Name("entity"), List(Term.ApplyType(Term.Name("as"), List(tpe: internal.ast.Type)))) =>
+        case Term.Apply(Term.Name("entity"), List(Term.ApplyType(Term.Name("as"), List(tpe: Type)))) =>
           List(Body(intermediate.Route.Body(
             tpeToIntermediate(tpe),
             None)))

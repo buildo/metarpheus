@@ -7,7 +7,7 @@ class RouteSuite extends FunSuite {
   lazy val parsed = {
     import scala.meta._
     import scala.meta.dialects.Scala211
-    morpheus.Fixtures.routes.parse[Source]
+    morpheus.Fixtures.routes.parse[Source].get
   }
 
   test("parse successfully") {

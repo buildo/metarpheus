@@ -29,8 +29,8 @@ package object extractors {
    * (which translates to nested `ApplyInfix`es).
    * e.g. getAllInfix(t1 + t2 + t3 + t4, "+") results in List(t1, t2, t3, t4)
    */
-  private[extractors] def getAllInfix(ainfix: internal.ast.Term, op: String): List[internal.ast.Term] = {
-    import scala.meta.internal.ast._
+  private[extractors] def getAllInfix(ainfix: Term, op: String): List[Term] = {
+    import scala.meta._
     ainfix match {
       case Term.ApplyInfix(subinfix: Term.ApplyInfix, Term.Name(`op`), Nil, List(term : Term)) =>
         getAllInfix(subinfix, `op`) :+ term
@@ -44,10 +44,10 @@ package object extractors {
    * Convert a scala-meta representation of a type to a metarpheus
    * intermediate representation
    */
-  private[extractors] def tpeToIntermediate(tpe: internal.ast.Type): intermediate.Type = tpe match {
-    case name: scala.meta.internal.ast.Type.Name =>
+  private[extractors] def tpeToIntermediate(tpe: Type): intermediate.Type = tpe match {
+    case name: scala.meta.Type.Name =>
       intermediate.Type.Name(name.value)
-    case scala.meta.internal.ast.Type.Apply(name: scala.meta.internal.ast.Type.Name, args) =>
+    case scala.meta.Type.Apply(name: scala.meta.Type.Name, args) =>
       intermediate.Type.Apply(name.value, args.map(tpeToIntermediate))
   }
 
@@ -64,7 +64,7 @@ package object extractors {
   /*
    * Search for the comment associated with this definition
    */
-  private[extractors] def findRelatedComment(source: scala.meta.Source, t: scala.meta.internal.ast.Defn): Option[scala.meta.Token] = {
+  private[extractors] def findRelatedComment(source: scala.meta.Source, t: scala.meta.Defn): Option[scala.meta.Token] = {
     val tokenIdx = source.tokens.indexOf(t.tokens(0))
     source.tokens.take(tokenIdx).reverse
       .takeWhile(c => emptyTokens.contains(c.name))

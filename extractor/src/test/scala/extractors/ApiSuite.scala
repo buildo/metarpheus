@@ -6,7 +6,10 @@ class ApiSuite extends FunSuite {
   lazy val parsed = {
     import scala.meta._
     import scala.meta.dialects.Scala211
-    List(morpheus.Fixtures.models.parse[Source], morpheus.Fixtures.routes.parse[Source])
+    List(
+      morpheus.Fixtures.models.parse[Source].get,
+      morpheus.Fixtures.routes.parse[Source].get
+    )
   }
 
   test("extract used models") {
