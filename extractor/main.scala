@@ -15,7 +15,7 @@ object main {
   private def parse(file: java.io.File): scala.meta.Source = {
     import scala.meta._
     import scala.meta.dialects.Scala211
-    file.parse[Source]
+    file.parse[Source].get
   }
 
   def main(argv: Array[String]) = {

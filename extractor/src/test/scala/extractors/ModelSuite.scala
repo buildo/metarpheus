@@ -7,7 +7,7 @@ class ModelSuite extends FunSuite {
   lazy val parsed = {
     import scala.meta._
     import scala.meta.dialects.Scala211
-    morpheus.Fixtures.models.parse[Source]
+    morpheus.Fixtures.models.parse[Source].get
   }
 
   test("extract case classes") {
