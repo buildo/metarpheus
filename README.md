@@ -10,4 +10,8 @@
   - [metarpheus-swagger](https://github.com/buildo/metarpheus-swagger)
 - human-readable API documentation
 
+## Usage
+
 Refer to the tests for examples of the required spray route formatting. More extensive documentation is a work in progress (along with an effort of open-sourcing our internal set of conventions and support libraries for spray-based servers).
+
+See also [this README](https://github.com/buildo/metarpheus/blob/giogonzo-readme-additions/extractor/README.md)
