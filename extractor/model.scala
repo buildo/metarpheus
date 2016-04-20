@@ -9,7 +9,7 @@ package object model {
   case class CaseClassDefnInfo(defn: Defn.Class, commentToken: Option[scala.meta.Token])
 
   def extractCaseClassDefns(source: scala.meta.Source): List[CaseClassDefnInfo] = {
-    source.topDownBreak.collect {
+    source.collect {
       case c:Defn.Class if c.mods.collectFirst {
         case Mod.Case() => ()
       }.isDefined => c
@@ -52,7 +52,7 @@ package object model {
   case class CaseEnumDefnInfo(defns: CaseEnumDefns, commentToken: Option[scala.meta.Token])
 
   def extractCaseEnumDefns(source: scala.meta.Source): List[CaseEnumDefnInfo] = {
-    source.topDownBreak.collect {
+    source.collect {
       case c:Defn.Trait if c.mods.collectFirst {
         case Mod.Annot(Ctor.Ref.Name("enum")) => ()
       }.isDefined => c
@@ -60,7 +60,7 @@ package object model {
       val comment = findRelatedComment(source, cc)
       CaseEnumDefnInfo(SugaredCaseEnumDefns(cc), comment)
     } ++
-    source.topDown.collect { case c =>
+    source.collect { case c =>
       c.children.sliding(2).filter {
         case (t: Defn.Trait) :: (o: Defn.Object) :: Nil =>
           t.mods.collectFirst {

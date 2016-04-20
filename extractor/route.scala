@@ -13,7 +13,7 @@ package object route {
    */
   def extractAliases(source: scala.meta.Source): Map[String, Alias] = {
 
-    source.topDownBreak.collect {
+    source.collect {
       case x: Defn.Val if x.mods.collectFirst {
         case Mod.Annot(Ctor.Ref.Name("alias")) => ()
       }.isDefined => x
@@ -33,7 +33,7 @@ package object route {
     authenticated: Boolean,
     routeTpe: Term.ApplyInfix,
     routeTerm: Term)
-  
+
   /**
    * Find a router definition in a source file and extract a list of routes to
    * be parsed as a bundle of terms and metadata.
@@ -58,7 +58,7 @@ package object route {
   def extractRouteTerms(source: scala.meta.Source): List[RouteTermInfo] = {
 
     val routesTerms: List[(Term, Boolean)] = // (term, authenticated)
-      source.topDownBreak.collect {
+      source.collect {
         case x: Defn.Val if x.mods.collectFirst {
           case Mod.Annot(
             Ctor.Ref.Name("publishRoute") |
