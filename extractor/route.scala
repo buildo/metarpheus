@@ -283,16 +283,15 @@ package object route {
       List(ctrlTerm: Term)
     ) = rterm
 
-    val (ctrlName1, ctrlName2) = ctrlTerm match {
-      case Term.Eta(Term.Select(Term.Name(x), Term.Name(y))) => (x, y)
-      case Term.Select(Term.Name(x), Term.Name(y)) => (x, y)
+    val ctrl: List[String] = ctrlTerm match {
+      case Term.Eta(Term.Select(Term.Name(x), Term.Name(y))) => List(x, y)
+      case Term.Select(Term.Name(x), Term.Name(y)) => List(x, y)
+      case Term.Name(x) => List(x)
       case _ => println(ctrlTerm.show[Structure]); ???
     }
 
     val segments = prefix.map(intermediate.RouteSegment.String) ++
       dirOut.getOne({ case Route(r) => r })
-
-    val ctrl: List[String] = ctrlName1 :: ctrlName2 :: Nil
 
     intermediate.Route(
       method = dirOut.getOne({ case Method(m) => m }),
