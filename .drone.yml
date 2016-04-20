@@ -1,0 +1,10 @@
+build:
+  metarpheus:
+    image: hseeberger/scala-sbt
+    commands:
+      - cd extractor
+      - sbt test -Dsbt.ivy.home=/drone/.ivy
+
+cache:
+  mount:
+    - /drone/.ivy
