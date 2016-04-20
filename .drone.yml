@@ -11,12 +11,16 @@ build:
       - cd extractor
       - sbt assembly -Dsbt.ivy.home=/drone/.ivy
       - mv target/scala-2.11/metarpheus-assembly-0.0.1-SNAPSHOT.jar metarpheus.jar
+    when:
+      branch: master
 
 publish:
   github_release:
     api_key: $$GITHUB_TOKEN
     files: extractor/metarpheus.jar
     checksum: sha1
+    when:
+      branch: master
 
 cache:
   mount:
