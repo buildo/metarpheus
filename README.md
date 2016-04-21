@@ -1,6 +1,6 @@
 # Metarpheus
 
-[![Build Status](https://travis-ci.org/buildo/metarpheus.svg?branch=master)](https://travis-ci.org/buildo/metarpheus)
+[![Build Status](https://drone.our.buildo.io/api/badges/buildo/metarpheus/status.svg)](https://drone.our.buildo.io/buildo/metarpheus)
 
 *Metarpheus* sifts through scala source files and extracts models (represented in scala as `case class`es) and specifically formatted [spray](http://spray.io/) routes (marked with @publishroute). At the current stage, it will output a json-based representation of models and APIs that can be subsequently transformed in:
 
