@@ -68,8 +68,8 @@ package object extractors {
   }
 
   private[extractors] sealed trait Tag
-  private[extractors] case class ParamDesc(name: String, desc: String) extends Tag
-  private[extractors] case class PathParamDesc(name: String, desc: String) extends Tag
+  private[extractors] case class ParamDesc(name: String, desc: Option[String]) extends Tag
+  private[extractors] case class PathParamDesc(name: String, desc: Option[String]) extends Tag
   private[extractors] case class RouteName(name: List[String]) extends Tag
 
   /**
@@ -84,8 +84,10 @@ package object extractors {
         .filter(_ != "").toList
 
       val TagRegex = """@([^\s]+) (.*)""".r
-      val ParamRegex = """@param ([^\s]+) (.*)""".r
-      val PathParamRegex = """@pathParam ([^\s]+) (.*)""".r
+      val ParamRegex = """@param ([^\s]+) (.+)""".r
+      val ParamRegexNoDesc = """@param ([^\s]+)""".r
+      val PathParamRegex = """@pathParam ([^\s]+) (.+)""".r
+      val PathParamRegexNoDesc = """@pathParam ([^\s]+)""".r
       val RouteNameRegex = """@name ([^\s]+)""".r
 
       val (desc, tagLines) = cleanLines.span(_ match {
@@ -102,8 +104,10 @@ package object extractors {
             case _ => true
           })
           val next = l match {
-            case ParamRegex(name, l1) => ParamDesc(name, (l1 :: tagls).mkString(" "))
-            case PathParamRegex(name, l1) => PathParamDesc(name, (l1 :: tagls).mkString(" "))
+            case ParamRegex(name, l1) => ParamDesc(name, Some((l1 :: tagls).mkString(" ")))
+            case ParamRegexNoDesc(name) => ParamDesc(name, None)
+            case PathParamRegex(name, l1) => PathParamDesc(name, Some((l1 :: tagls).mkString(" ")))
+            case PathParamRegexNoDesc(name) => PathParamDesc(name, None)
             case RouteNameRegex(name) => RouteName(name.split("""\.""").toList)
           }
           getTags(acc :+ next, rest)

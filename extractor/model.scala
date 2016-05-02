@@ -36,7 +36,7 @@ package object model {
         intermediate.CaseClass.Member(
           name = name,
           tpe = tpeToIntermediate(tpe),
-          desc = paramDescs.find(_.name == name).map(_.desc)
+          desc = paramDescs.find(_.name == name).flatMap(_.desc)
         )
     }.toList
     intermediate.CaseClass(
