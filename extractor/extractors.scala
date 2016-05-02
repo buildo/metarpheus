@@ -83,7 +83,7 @@ package object extractors {
     token: Option[scala.meta.Token]): (Option[String], List[Tag]) =
 
     token.map { c =>
-      val cleanLines = stripCommentMarkers(c.code)
+      val cleanLines = stripCommentMarkers(c.show[Syntax])
         .split("\n").map(_.trim.stripPrefix("*").trim)
         .filter(_ != "").toList
 

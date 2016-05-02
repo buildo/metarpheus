@@ -24,7 +24,7 @@ package object route {
         term: Term
       ) =>
       val comment = findRelatedComment(source, t)
-      (name, Alias(term, comment.map(token => stripCommentMarkers(token.code).trim)))
+      (name, Alias(term, comment.map(token => stripCommentMarkers(token.show[Syntax]).trim)))
     }.toMap
   }
 
