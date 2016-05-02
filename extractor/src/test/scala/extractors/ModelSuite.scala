@@ -23,7 +23,7 @@ class ModelSuite extends FunSuite {
             CaseClass.Member(
               name = "name",
               tpe = Type.Name("String"),
-              desc = Some("camping name")),
+              desc = None),
             CaseClass.Member(
               name = "size",
               tpe = Type.Name("Int"),

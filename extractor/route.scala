@@ -131,8 +131,8 @@ package object route {
 
   case class RouteCommentInfo(
     desc: Option[String],
-    paramDescs: Map[String, String],
-    pathParamNamesAndDescs: List[(String, String)],
+    paramDescs: Map[String, Option[String]],
+    pathParamNamesAndDescs: List[(String, Option[String])],
     routeName: Option[List[String]])
 
   /**
@@ -183,7 +183,7 @@ package object route {
         List(paramTpe: Type)
       ) = applyType
       val name = paramSym.name
-      val desc = paramDescs.get(name).orElse(aliasDesc)
+      val desc = paramDescs.get(name).getOrElse(aliasDesc)
       intermediate.RouteParam(
         name = Some(name),
         tpe = tpeToIntermediate(paramTpe),
@@ -196,7 +196,7 @@ package object route {
         name = Some(name),
         tpe = intermediate.Type.Name("String"),
         required = true,
-        desc = paramDescs.get(name).orElse(aliasDesc)
+        desc = paramDescs.get(name).getOrElse(aliasDesc)
       )
 
     val defaultRouteMatchers = Map(
@@ -257,7 +257,7 @@ package object route {
             case _ => (route.foldLeft((pathParamNamesAndDescs, List[intermediate.RouteSegment]())) {
               case (((name, desc) :: pps, acc), intermediate.RouteSegment.Param(routeParam)) =>
                 (pps,
-                  acc :+ intermediate.RouteSegment.Param(routeParam.copy(name = Some(name), desc = Some(desc))))
+                  acc :+ intermediate.RouteSegment.Param(routeParam.copy(name = Some(name), desc = desc)))
               case ((pps, acc), segment) => (pps, acc :+ segment)
             })._2
           }
