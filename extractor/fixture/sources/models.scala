@@ -4,7 +4,7 @@ package models
 
 /**
  * Represents a camping site
- * @param name camping name
+ * @param name
  * @param size number of tents
  * @param location camping location
  */
