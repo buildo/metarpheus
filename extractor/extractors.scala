@@ -51,8 +51,6 @@ package object extractors {
       intermediate.Type.Apply(name.value, args.map(tpeToIntermediate))
   }
 
-  private val emptyTokens = Set(" ", "\\n", "comment")
-
   private[extractors] def stripCommentMarkers(s: String) =
     s.stripPrefix("/")
       .dropWhile(_ == '*')
@@ -66,9 +64,7 @@ package object extractors {
    */
   private[extractors] def findRelatedComment(source: scala.meta.Source, t: scala.meta.Defn): Option[scala.meta.Token] = {
     val tokenIdx = source.tokens.indexOf(t.tokens(0))
-    source.tokens.take(tokenIdx).reverse
-      .takeWhile(c => emptyTokens.contains(c.name))
-      .find(_.name == "comment")
+    source.tokens.take(tokenIdx).reverse.find(_.name == "comment")
   }
 
   private[extractors] sealed trait Tag
