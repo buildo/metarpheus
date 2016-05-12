@@ -16,7 +16,7 @@ package object extractors {
     val caseClasses: List[intermediate.CaseClass] =
       models.collect { case x: intermediate.CaseClass => x }
 
-    val routes: List[intermediate.Route] = 
+    val routes: List[intermediate.Route] =
       parsed.flatMap(extractors.route.extractAllRoutes(caseClasses, routeOverrides, routeMatcherToIntermediate))
 
     intermediate API(models, routes)
