@@ -16,7 +16,7 @@ package object extractors {
     val caseClasses: List[intermediate.CaseClass] =
       models.collect { case x: intermediate.CaseClass => x }
 
-    val routes: List[intermediate.Route] = 
+    val routes: List[intermediate.Route] =
       parsed.flatMap(extractors.route.extractAllRoutes(caseClasses, routeOverrides, routeMatcherToIntermediate))
 
     intermediate API(models, routes)
@@ -63,7 +63,8 @@ package object extractors {
    * Search for the comment associated with this definition
    */
   private[extractors] def findRelatedComment(source: scala.meta.Source, t: scala.meta.Defn): Option[scala.meta.Token] = {
-    val tokenIdx = source.tokens.indexOf(t.tokens(0))
+    val tokens = t.tokens
+    val tokenIdx = source.tokens.indexOf(tokens(0))
     source.tokens.take(tokenIdx).reverse.find(_.name == "comment")
   }
 
