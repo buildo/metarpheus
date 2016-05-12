@@ -14,7 +14,8 @@ package object model {
         case Mod.Case() => ()
       }.isDefined => c
     }.map { cc =>
-      val tokenIdx = source.tokens.indexOf(cc.tokens(0))
+      val tokens = cc.tokens
+      val tokenIdx = source.tokens.indexOf(tokens(0))
       val comment = findRelatedComment(source, cc)
       CaseClassDefnInfo(cc, comment)
     }
