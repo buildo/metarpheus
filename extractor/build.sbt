@@ -2,7 +2,7 @@ organization  := "io.buildo"
 
 name := "metarpheus"
 
-version       := "0.0.1-SNAPSHOT"
+version       := "0.1.0"
 
 scalaVersion  := "2.11.7"
 
@@ -17,7 +17,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalameta" % "scalameta" % "0.1.0-SNAPSHOT" cross CrossVersion.binary,
+  "org.scalameta" % "scalameta" % "0.20.0" cross CrossVersion.binary,
   "org.rogach" %% "scallop" % "1.0.0",
   "org.json4s" %% "json4s-jackson" % "3.2.11",
   "com.twitter" %% "util-eval" % "6.33.0",
