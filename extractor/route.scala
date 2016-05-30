@@ -215,7 +215,7 @@ package object route {
 
     val dirOut: List[DirOut] = rdirs.flatMap { term =>
       def extract(t: Term, aliasDesc: Option[String]): List[DirOut] = t match {
-        case Term.Name(method) if List("get", "post").contains(method) =>
+        case Term.Name(method) if List("get", "post", "delete", "put").contains(method) =>
           List(Method(method))
         case Term.Apply(Term.Name("parameters" | "parameter"), paramTerms: List[Term]) =>
           paramTerms.map {
@@ -242,9 +242,9 @@ package object route {
                 required = required,
                 desc = desc))
           }
-        case Term.Name("pathEnd") =>
+        case Term.Name("pathEnd" | "pathEndCommit") =>
           List(Route(Nil))
-        case Term.Apply(Term.Name("path"), List(pathTerm: Term)) =>
+        case Term.Apply(Term.Name("path" | "pathCommit"), List(pathTerm: Term)) =>
           val route = getAllInfix(pathTerm, "/").map {
             case Term.Name(segmentMatcher) =>
               intermediate.RouteSegment.Param(intermediate.RouteParam(
@@ -272,12 +272,16 @@ package object route {
             })._2
           }
           List(Route(result))
-        case Term.Apply(Term.Name("entity"), List(Term.ApplyType(Term.Name("as"), List(tpe: Type)))) =>
+        case Term.Apply(Term.Name("entity" | "flatEntity"), List(Term.ApplyType(Term.Name("as" | "flatAs"), List(tpe: Type)))) =>
           List(Body(intermediate.Route.Body(
             tpeToIntermediate(tpe),
             None)))
         case Term.Name(name) if aliases.contains(name) =>
           extract(aliases(name).term, aliasDesc = aliases(name).desc)
+        case Term.Apply(Term.Select(termAs, Term.Name("as")), _) =>
+          extract(termAs, aliasDesc)
+        case termInfix: Term.ApplyInfix =>
+          getAllInfix(termInfix, "&").map(extract(_, aliasDesc)).flatten
         case otherwise => println(otherwise.show[Structure]); ???
       }
       extract(term, aliasDesc = None)
@@ -289,7 +293,7 @@ package object route {
           Term.Name("returns"),
           List(returnTpe: Type)
         ),
-        Term.Name("ctrl")
+        Term.Name("ctrl" | "ctrlu")
       ),
       List(ctrlTerm: Term)
     ) = rterm
