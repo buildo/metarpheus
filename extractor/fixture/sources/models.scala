@@ -31,3 +31,12 @@ object Surface {
   case object Earth extends Surface
 }
 
+/*
+ * Planet of the camping site
+ */
+@enum trait Planet {
+  /* Earth is a blue planet */
+  Earth
+  /* Not sure campings exist */
+  Another
+}
