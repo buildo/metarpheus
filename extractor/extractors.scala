@@ -62,7 +62,7 @@ package object extractors {
   /*
    * Search for the comment associated with this definition
    */
-  private[extractors] def findRelatedComment(source: scala.meta.Source, t: scala.meta.Defn): Option[scala.meta.Token] = {
+  private[extractors] def findRelatedComment(source: scala.meta.Source, t: scala.meta.Tree): Option[scala.meta.Token] = {
     val tokens = t.tokens
     val tokenIdx = source.tokens.indexOf(tokens(0))
     source.tokens.take(tokenIdx).reverse.find(_.name == "comment")

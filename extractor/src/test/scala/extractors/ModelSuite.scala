@@ -50,6 +50,20 @@ class ModelSuite extends FunSuite {
           desc = Some("Location of the camping site")
         ),
         CaseEnum(
+          name = "Planet",
+          values = List(
+            CaseEnum.Member(
+              name = "Earth",
+              desc = Some("Earth is a blue planet")
+            ),
+            CaseEnum.Member(
+              name = "Another",
+              desc = Some("Not sure campings exist")
+            )
+          ),
+          desc = Some("Planet of the camping site")
+        ),
+        CaseEnum(
           name = "Surface",
           values = List(
             CaseEnum.Member(

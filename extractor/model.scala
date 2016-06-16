@@ -95,6 +95,11 @@ package object model {
           val (memberDesc, _) = extractDescAndTagsFromComment(comment)
           intermediate.CaseEnum.Member(memberName, memberDesc)
         }
+        case o@Term.Name(memberName) => {
+          val comment = findRelatedComment(source, o)
+          val (memberDesc, _) = extractDescAndTagsFromComment(comment)
+          intermediate.CaseEnum.Member(memberName, memberDesc)
+        }
       }.toList
     }
 
