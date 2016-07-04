@@ -101,16 +101,21 @@ package object route {
             Term.Name("pathPrefix"),
             List(Lit(addPrefix: String))
           ),
-          List(Term.Block(List(t : Term)))
+          List(Term.Block(List(t: Term)))
         ) => recurse(prefix :+ addPrefix)(t, authenticated)
         case x@(Term.Apply(
           Term.Name(termName),
-          List(Term.Block(List(Term.Select(t : Term, _)))))
+          List(Term.Block(List(Term.Select(t: Term, _)))))
         ) if authRouteTermNames.contains(termName) => recurse(prefix)(t, true)
         case Term.Apply(
           Term.Apply(Term.Name(termName), _),
-          List(Term.Block(List(t : Term)))
+          List(Term.Block(List(t: Term)))
         ) if authRouteTermNames.contains(termName) => recurse(prefix)(t, true)
+        case Term.Apply(
+          Term.Apply(Term.Name(termName), _),
+          List(Term.Block(List(t: Term)))
+        ) if authRouteTermNames.contains(termName) => recurse(prefix)(t, true)
+        case Term.Function(_, Term.Block(List(t: Term))) => recurse(prefix)(t, authenticated)
         case Term.Apply(routeTpe : Term.ApplyInfix, List(routeTerm : Term)) =>
           List(
             RouteTermInfo(prefix, authenticated, routeTpe, routeTerm)
