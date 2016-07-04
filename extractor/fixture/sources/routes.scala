@@ -41,6 +41,11 @@ trait CampingRouterModule extends io.buildo.base.MonadicCtrlRouterModule
         @param size the number of tents
         @param nickname a friendly name for the camping
       */) (returns[List[Camping]].ctrl(campingController.getByCoolnessAndSize _)) ~
+      (get & pathEnd & parameters('size.as[Int], 'distance.as[Int]).as(Foo) /**
+        get campings matching the requested size and distance
+        @param size the number of tents
+        @param distance how distant it is
+      */) (returns[List[Camping]].ctrl(campingController.getBySizeAndDistance _)) ~
       withUserAuthentication {
         (get & path(IntNumber) /**
           get a camping by id
