@@ -217,6 +217,7 @@ package object route {
             case Lit(sym: Symbol) => Param(extractSimpleParamTerm(sym.name, aliasDesc))
             case Lit(name: String) => Param(extractSimpleParamTerm(name, aliasDesc))
           }
+        case Term.Apply(Term.Select(p, Term.Name("as")), _)  => extract(p, aliasDesc)
         case Term.ApplyType(Term.Name("params"), Seq(Type.Name(typeName))) =>
           models.find(_.name == typeName).get.members.map {
             case intermediate.CaseClass.Member(name, tpe, desc) =>
@@ -268,6 +269,7 @@ package object route {
             None)))
         case Term.Name(name) if aliases.contains(name) =>
           extract(aliases(name).term, aliasDesc = aliases(name).desc)
+        case otherwise => println(otherwise.show[Structure]); ???
       }
       extract(term, aliasDesc = None)
     }

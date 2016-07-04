@@ -54,7 +54,32 @@ class RouteSuite extends FunSuite {
           ctrl = List("campingController", "getByCoolnessAndSize"),
           desc = Some("get campings matching the requested coolness and size"),
           name = List("campingController", "getByCoolnessAndSize")
-
+        ),
+        Route(
+          method = "get",
+          route = List(
+            RouteSegment.String("campings")
+          ),
+          params = List(
+            RouteParam(
+              Some("size"),
+              Type.Name("Int"),
+              true,
+              Some("the number of tents")
+            ),
+            RouteParam(
+              Some("distance"),
+              Type.Name("Int"),
+              true,
+              Some("how distant it is")
+            )
+          ),
+          authenticated = false,
+          returns = Type.Apply("List", List(Type.Name("Camping"))),
+          body = None,
+          ctrl = List("campingController", "getBySizeAndDistance"),
+          desc = Some("get campings matching the requested size and distance"),
+          name = List("campingController", "getBySizeAndDistance")
         ),
         Route(
           method = "get",
