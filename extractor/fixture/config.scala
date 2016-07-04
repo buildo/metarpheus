@@ -19,4 +19,6 @@ new morpheus.Config {
       desc = Some("gets something"),
       name = List("campingController", "overridden")
     ))
+
+  override val authRouteTermNames = List("withUserAuthentication", "withRole")
 }

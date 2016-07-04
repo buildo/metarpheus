@@ -19,7 +19,7 @@ class RouteSuite extends FunSuite {
 
     val models = model.extractModel(parsed)
     val caseClasses = models.collect { case x: morpheus.intermediate.CaseClass => x }
-    val result = extractAllRoutes(caseClasses, Common.overrides, Common.routeMatcherToTpe)(parsed)
+    val result = extractAllRoutes(caseClasses, Common.overrides, Common.routeMatcherToTpe, Common.authRouteTermNames)(parsed)
 
     assert(result.toString ===
       List(
@@ -148,7 +148,7 @@ class RouteSuite extends FunSuite {
               Some("the number of tents")
             )
           ),
-          authenticated = false,
+          authenticated = true,
           returns = Type.Apply("List", List(Type.Name("Camping"))),
           body = None,
           ctrl = List("campingController", "getByQuery"),

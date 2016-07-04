@@ -8,7 +8,9 @@ package object extractors {
   def extractFullAPI(
     parsed: List[scala.meta.Source],
     routeOverrides: Map[List[String], intermediate.Route],
-    routeMatcherToIntermediate: PartialFunction[(String, Option[intermediate.Type]), intermediate.Type]): intermediate.API = {
+    routeMatcherToIntermediate: PartialFunction[(String, Option[intermediate.Type]), intermediate.Type],
+    authRouteTermNames: List[String]
+  ): intermediate.API = {
 
     val models: List[intermediate.Model] =
       parsed.flatMap(extractors.model.extractModel)
@@ -17,7 +19,7 @@ package object extractors {
       models.collect { case x: intermediate.CaseClass => x }
 
     val routes: List[intermediate.Route] =
-      parsed.flatMap(extractors.route.extractAllRoutes(caseClasses, routeOverrides, routeMatcherToIntermediate))
+      parsed.flatMap(extractors.route.extractAllRoutes(caseClasses, routeOverrides, routeMatcherToIntermediate, authRouteTermNames))
 
     intermediate API(models, routes)
   }
