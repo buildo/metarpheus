@@ -55,7 +55,7 @@ package object route {
    * authenticated will be true if the "authenticated" param for @publishRoute
    * is true or if a "withUserAuthentication" directive has been encountered
    */
-  def extractRouteTerms(source: scala.meta.Source): List[RouteTermInfo] = {
+  def extractRouteTerms(source: scala.meta.Source, authRouteTermNames: List[String]): List[RouteTermInfo] = {
 
     val routesTerms: List[(Term, Boolean)] = // (term, authenticated)
       source.collect {
@@ -95,23 +95,32 @@ package object route {
 
       val routeTerms = getAllInfix(routesTerm, "~")
 
-      routeTerms.flatMap { 
+      routeTerms.flatMap {
         case Term.Apply(
           Term.Apply(
             Term.Name("pathPrefix"),
             List(Lit(addPrefix: String))
           ),
-          List(Term.Block(List(t : Term)))
+          List(Term.Block(List(t: Term)))
         ) => recurse(prefix :+ addPrefix)(t, authenticated)
+        case x@(Term.Apply(
+          Term.Name(termName),
+          List(Term.Block(List(Term.Select(t: Term, _)))))
+        ) if authRouteTermNames.contains(termName) => recurse(prefix)(t, true)
         case Term.Apply(
-          Term.Name("withUserAuthentication"),
-          List(Term.Block(List(Term.Select(t : Term, _))))
-        ) => recurse(prefix)(t, true)
+          Term.Apply(Term.Name(termName), _),
+          List(Term.Block(List(t: Term)))
+        ) if authRouteTermNames.contains(termName) => recurse(prefix)(t, true)
+        case Term.Apply(
+          Term.Apply(Term.Name(termName), _),
+          List(Term.Block(List(t: Term)))
+        ) if authRouteTermNames.contains(termName) => recurse(prefix)(t, true)
+        case Term.Function(_, Term.Block(List(t: Term))) => recurse(prefix)(t, authenticated)
         case Term.Apply(routeTpe : Term.ApplyInfix, List(routeTerm : Term)) =>
           List(
             RouteTermInfo(prefix, authenticated, routeTpe, routeTerm)
           )
-        case otherwise => println(otherwise.show[Structure]); ???
+        case otherwise => println(otherwise.show[Structure]); println(authRouteTermNames); ???
       }
     }
 
@@ -121,7 +130,7 @@ package object route {
   private case class TooFewMatches() extends Exception
   private case class TooManyMatches() extends Exception
   private implicit class ListPimp[A](list: List[A]) {
-    def getOne[B](pf: PartialFunction[A, B]) = 
+    def getOne[B](pf: PartialFunction[A, B]) =
       list.collect(pf) match {
         case List(one) => one
         case List() => throw TooFewMatches()
@@ -308,9 +317,9 @@ package object route {
 
   }
 
-  def extractAllRoutes(models: List[intermediate.CaseClass], overrides: Map[List[String], intermediate.Route], routeMatcherToIntermediate: PartialFunction[(String, Option[intermediate.Type]), intermediate.Type])(f: scala.meta.Source): List[intermediate.Route] = {
+  def extractAllRoutes(models: List[intermediate.CaseClass], overrides: Map[List[String], intermediate.Route], routeMatcherToIntermediate: PartialFunction[(String, Option[intermediate.Type]), intermediate.Type], authRouteTermNames: List[String])(f: scala.meta.Source): List[intermediate.Route] = {
     val aliases = extractAliases(f)
-    extractRouteTerms(f).map { routeTerm =>
+    extractRouteTerms(f, authRouteTermNames).map { routeTerm =>
       val routeCommentInfo = extractRouteCommentInfo(routeTerm.routeTpe)
       routeCommentInfo.routeName.flatMap(overrides.get _)
         .getOrElse(extractRoute(aliases, models, routeMatcherToIntermediate)(routeTerm, routeCommentInfo))

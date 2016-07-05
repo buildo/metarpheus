@@ -44,7 +44,9 @@ object main {
 
     val api = extractors.extractFullAPI(parsed,
       config.routeOverrides,
-      config.routeMatcherToIntermediate).stripUnusedModels
+      config.routeMatcherToIntermediate,
+      config.authRouteTermNames
+    ).stripUnusedModels
 
     val serializedAPI = repr.serializeAPI(api)
 

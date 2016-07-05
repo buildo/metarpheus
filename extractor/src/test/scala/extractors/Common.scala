@@ -28,4 +28,5 @@ object Common {
       case ("Id", Some(x@Type.Name(_))) => Type.Apply("Id", Seq(x))
     }
 
+    val authRouteTermNames = List("withUserAuthentication", "withRole")
 }

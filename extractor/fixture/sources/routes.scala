@@ -14,7 +14,7 @@ trait CampingRouterModule extends io.buildo.base.MonadicCtrlRouterModule
   with io.buildo.base.MonadicRouterHelperModule
   with io.buildo.base.ConfigModule
   with JsonSerializerModule
-  
+
   with CampingControllerModule {
 
   import ExampleJsonProtocol._
@@ -65,10 +65,11 @@ trait CampingRouterModule extends io.buildo.base.MonadicCtrlRouterModule
         overridable route
         @name campingController.overridden
       */) (returns[Camping].ctrl(campingController.something _)) ~
-      (get & path("by_query") & params[GetByQueryParams] /**
-        get multiple campings by params with case class
-      */) (returns[List[Camping]].ctrl(campingController.getByQuery _))
+      withRole(Admin) { user =>
+        (get & path("by_query") & params[GetByQueryParams] /**
+          get multiple campings by params with case class
+        */) (returns[List[Camping]].ctrl(campingController.getByQuery _))
+      }
     }
   }
 }
-
