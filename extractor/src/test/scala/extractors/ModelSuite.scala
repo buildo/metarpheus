@@ -31,7 +31,11 @@ class ModelSuite extends FunSuite {
             CaseClass.Member(
               name = "location",
               tpe = Type.Name("CampingLocation"),
-              desc = Some("camping location"))
+              desc = Some("camping location")),
+            CaseClass.Member(
+              name = "rating",
+              tpe = Type.Name("CampingRating"),
+              desc = Some("camping rating"))
           ),
           desc = Some("Represents a camping site")
         ),
@@ -48,6 +52,24 @@ class ModelSuite extends FunSuite {
             )
           ),
           desc = Some("Location of the camping site")
+        ),
+        CaseEnum(
+          name = "CampingRating",
+          values = List(
+            CaseEnum.Member(
+              name = "High",
+              desc = Some("High")
+            ),
+            CaseEnum.Member(
+              name = "Medium",
+              desc = Some("Medium")
+            ),
+            CaseEnum.Member(
+              name = "Low",
+              desc = Some("Low")
+            )
+          ),
+          desc = Some("Rating of the camping site")
         ),
         CaseEnum(
           name = "Planet",

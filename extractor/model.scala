@@ -55,7 +55,7 @@ package object model {
   def extractCaseEnumDefns(source: scala.meta.Source): List[CaseEnumDefnInfo] = {
     source.collect {
       case c:Defn.Trait if c.mods.collectFirst {
-        case Mod.Annot(Ctor.Ref.Name("enum")) => ()
+        case Mod.Annot(Ctor.Ref.Name("enum" | "indexedEnum")) => ()
       }.isDefined => c
     }.map { cc =>
       val comment = findRelatedComment(source, cc)
@@ -89,7 +89,7 @@ package object model {
     caseEnumDefnInfo: CaseEnumDefnInfo): intermediate.CaseEnum = {
 
     def membersFromTempl(t: Template): List[intermediate.CaseEnum.Member] = {
-      t.stats.get.map {
+      t.stats.get.collect {
         case o@Defn.Object(_, Term.Name(memberName), _) => {
           val comment = findRelatedComment(source, o)
           val (memberDesc, _) = extractDescAndTagsFromComment(comment)

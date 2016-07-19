@@ -7,8 +7,9 @@ package models
  * @param name
  * @param size number of tents
  * @param location camping location
+ * @param rating camping rating
  */
-case class Camping(name: String, size: Int, location: CampingLocation)
+case class Camping(name: String, size: Int, location: CampingLocation, rating: CampingRating)
 
 /*
  * Location of the camping site
@@ -18,6 +19,19 @@ case class Camping(name: String, size: Int, location: CampingLocation)
   object Seaside
   /* High up */
   object Mountains
+}
+
+/*
+ * Rating of the camping site
+ */
+@indexedEnum trait CampingRating {
+  type Index = Int
+  /* High */
+  object High { 3 }
+  /* Medium */
+  object Medium { 2 }
+  /* Low */
+  object Low { 1 }
 }
 
 /*
