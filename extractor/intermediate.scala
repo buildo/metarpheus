@@ -60,7 +60,7 @@ case class API(
   models: List[Model],
   routes: List[Route]) {
 
-  def stripUnusedModels(includedCustomModels: Set[String] = Set.empty): API = {
+  def stripUnusedModels(modelsForciblyInUse: Set[String] = Set.empty): API = {
     val modelsInUse: Set[intermediate.Type] = {
       routes.flatMap { route =>
         route.route.collect {
@@ -94,11 +94,11 @@ case class API(
     val recursivelyUsedModels = fixpoint(modelsInUse)
 
     // check models forcibly included are not already used by the routes
-    val modelsIntersection = recursivelyUsedModels.intersect(includedCustomModels)
+    val modelsIntersection = recursivelyUsedModels.intersect(modelsForciblyInUse)
     if (!modelsIntersection.isEmpty)
       throw new Exception(s"The following models are already used by the routes, no need to force inclusion: $modelsIntersection")
 
-    val inUseNames = recursivelyUsedModels ++ includedCustomModels
+    val inUseNames = recursivelyUsedModels ++ modelsForciblyInUse
 
     this.copy(models = models.filter(m => inUseNames.contains(m.name)))
   }

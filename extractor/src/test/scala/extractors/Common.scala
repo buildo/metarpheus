@@ -30,5 +30,5 @@ object Common {
 
     val authRouteTermNames = List("withUserAuthentication", "withRole")
 
-    val customModelsIncluded = Set("Swan")
+    val modelsForciblyInUse = Set("Swan")
 }

@@ -16,7 +16,7 @@ class ApiSuite extends FunSuite {
     import morpheus.intermediate._
 
     val api = extractFullAPI(parsed, Common.overrides, Common.routeMatcherToTpe, Common.authRouteTermNames)
-      .stripUnusedModels(Common.customModelsIncluded)
+      .stripUnusedModels(Common.modelsForciblyInUse)
 
     assert(api.models.collectFirst {
       case CaseEnum("CampingLocation", _, _) => ()

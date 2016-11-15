@@ -46,7 +46,7 @@ object main {
       config.routeOverrides,
       config.routeMatcherToIntermediate,
       config.authRouteTermNames
-    ).stripUnusedModels(config.customModelsIncluded)
+    ).stripUnusedModels(config.modelsForciblyInUse)
 
     val serializedAPI = repr.serializeAPI(api)
 
