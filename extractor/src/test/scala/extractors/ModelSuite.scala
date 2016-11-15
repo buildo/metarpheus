@@ -39,6 +39,17 @@ class ModelSuite extends FunSuite {
           ),
           desc = Some("Represents a camping site")
         ),
+        CaseClass(
+          name = "Swan",
+          members = List(
+            CaseClass.Member(
+              name = "color",
+              tpe = Type.Name("String"),
+              desc = Some("color of the swan")
+            )
+          ),
+          desc = Some("Represents a swan")
+        ),
         CaseEnum(
           name = "CampingLocation",
           values = List(

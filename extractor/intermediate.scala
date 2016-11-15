@@ -60,7 +60,7 @@ case class API(
   models: List[Model],
   routes: List[Route]) {
 
-  def stripUnusedModels: API = {
+  def stripUnusedModels(includedCustomModels: Seq[String] = Nil): API = {
     val modelsInUse: Set[intermediate.Type] = {
       routes.flatMap { route =>
         route.route.collect {
@@ -91,7 +91,7 @@ case class API(
       else fixpoint(newInUse)
     }
 
-    val inUseNames = fixpoint(modelsInUse)
+    val inUseNames = fixpoint(modelsInUse) ++ includedCustomModels
 
     this.copy(models = models.filter(m => inUseNames.contains(m.name)))
   }
