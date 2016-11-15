@@ -7,7 +7,7 @@ trait Config {
 
   val authRouteTermNames: List[String] = Nil
 
-  val customModelsIncluded: List[String] = Nil
+  val customModelsIncluded: Set[String] = Set.empty
 }
 
 object DefaultConfig extends Config {
