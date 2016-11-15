@@ -11,6 +11,12 @@ package models
  */
 case class Camping(name: String, size: Int, location: CampingLocation, rating: CampingRating)
 
+/**
+  *  Represents a swan
+  *  @param color color of the swan
+  */
+case class Swan(color: String)
+
 /*
  * Location of the camping site
  */

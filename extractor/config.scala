@@ -6,6 +6,8 @@ trait Config {
   val routeOverrides: Map[List[String], intermediate.Route] = Map()
 
   val authRouteTermNames: List[String] = Nil
+
+  val modelsForciblyInUse: Set[String] = Set.empty
 }
 
 object DefaultConfig extends Config {
