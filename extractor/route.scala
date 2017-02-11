@@ -188,7 +188,7 @@ package object route {
       applyType: Term.ApplyType, optional: Boolean, aliasDesc: Option[String]): intermediate.RouteParam = {
 
       val Term.ApplyType(
-        Term.Select(Lit(paramSym: Symbol), Term.Name("as")),
+        Term.Select(Lit(paramSym: scala.Symbol), Term.Name("as")),
         List(paramTpe: Type)
       ) = applyType
       val name = paramSym.name
@@ -223,7 +223,7 @@ package object route {
               Param(extractParamTerm(applyType, true, aliasDesc))
             case applyType: Term.ApplyType =>
               Param(extractParamTerm(applyType, false, aliasDesc))
-            case Lit(sym: Symbol) => Param(extractSimpleParamTerm(sym.name, aliasDesc))
+            case Lit(sym: scala.Symbol) => Param(extractSimpleParamTerm(sym.name, aliasDesc))
             case Lit(name: String) => Param(extractSimpleParamTerm(name, aliasDesc))
           }
         case Term.Apply(Term.Select(p, Term.Name("as")), _)  => extract(p, aliasDesc)

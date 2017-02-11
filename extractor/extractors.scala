@@ -2,6 +2,8 @@ package morpheus
 
 import scala.meta._
 import scala.meta.dialects.Scala211
+import scala.meta.tokens.Token.Comment
+import scala.meta.contrib.AssociatedComments
 
 package object extractors {
 
@@ -64,11 +66,8 @@ package object extractors {
   /*
    * Search for the comment associated with this definition
    */
-  private[extractors] def findRelatedComment(source: scala.meta.Source, t: scala.meta.Tree): Option[scala.meta.Token] = {
-    val tokens = t.tokens
-    val tokenIdx = source.tokens.indexOf(tokens(0))
-    source.tokens.take(tokenIdx).reverse.find(_.is[Token.Comment])
-  }
+  private[extractors] def findRelatedComment(source: scala.meta.Source, t: scala.meta.Tree): Option[scala.meta.Token] =
+    AssociatedComments(source.tokens).leading(t).headOption
 
   private[extractors] sealed trait Tag
   private[extractors] case class ParamDesc(name: String, desc: Option[String]) extends Tag
