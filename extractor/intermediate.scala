@@ -33,7 +33,9 @@ case class RouteParam(
   name: Option[String],
   tpe: Type,
   required: Boolean,
-  desc: Option[String])
+  desc: Option[String],
+  inBody: Boolean = false
+)
 
 sealed trait RouteSegment
 case object RouteSegment {

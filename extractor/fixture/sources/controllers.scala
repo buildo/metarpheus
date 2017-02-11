@@ -8,7 +8,7 @@ import wiro.annotation._
 
 import scala.concurrent.{ Future, ExecutionContext }
 
-@name("campings")
+@path("campings")
 trait CampingController {
   /**
    * get campings matching the requested coolness and size

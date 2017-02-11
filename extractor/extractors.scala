@@ -21,7 +21,11 @@ package object extractors {
       models.collect { case x: intermediate.CaseClass => x }
 
     val routes: List[intermediate.Route] =
-      parsed.flatMap(extractors.route.extractAllRoutes(caseClasses, routeOverrides, routeMatcherToIntermediate, authRouteTermNames))
+      if (wiro) {
+        parsed.flatMap(extractors.controller.extractAllRoutes)
+      } else {
+        parsed.flatMap(extractors.route.extractAllRoutes(caseClasses, routeOverrides, routeMatcherToIntermediate, authRouteTermNames))
+      }
 
     intermediate API(models, routes)
   }
