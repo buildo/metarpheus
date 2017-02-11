@@ -7,6 +7,7 @@ import org.rogach.scallop._
 class CommandLine(args: Array[String]) extends ScallopConf(args) {
   val configPath = opt[String]("config", descr = "config file path", required = false)
   val outputFile = opt[String]("output", descr = "output file path", required = false)
+  val wiro = opt[Boolean]("wiro", descr = "parse wiro-style", required = false)
   val directories = trailArg[List[String]](required = true)
   verify()
 }
@@ -42,10 +43,13 @@ object main {
       eval.apply(new File(fileName)) : Config
     }.getOrElse(DefaultConfig)
 
+    val wiro = conf.wiro.get.getOrElse(false)
+
     val api = extractors.extractFullAPI(parsed,
       config.routeOverrides,
       config.routeMatcherToIntermediate,
-      config.authRouteTermNames
+      config.authRouteTermNames,
+      wiro
     ).stripUnusedModels(config.modelsForciblyInUse)
 
     val serializedAPI = repr.serializeAPI(api)

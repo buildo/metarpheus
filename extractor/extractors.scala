@@ -11,7 +11,8 @@ package object extractors {
     parsed: List[scala.meta.Source],
     routeOverrides: Map[List[String], intermediate.Route],
     routeMatcherToIntermediate: PartialFunction[(String, Option[intermediate.Type]), intermediate.Type],
-    authRouteTermNames: List[String]
+    authRouteTermNames: List[String],
+    wiro: Boolean
   ): intermediate.API = {
 
     val models: List[intermediate.Model] =
