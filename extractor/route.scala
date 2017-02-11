@@ -149,7 +149,7 @@ package object route {
    */
   def extractRouteCommentInfo(rtpe: Term.ApplyInfix): RouteCommentInfo = {
     val (desc, tags) = extractDescAndTagsFromComment(
-      rtpe.tokens.find(_.name == "comment"))
+      rtpe.tokens.find(_.is[Token.Comment]))
 
     val paramDescs = tags.collect { case ParamDesc(name, d) => name -> d }.toMap
     val pathParamNamesAndDescs = tags.collect { case PathParamDesc(name, d) => name -> d }

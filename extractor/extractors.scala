@@ -67,7 +67,7 @@ package object extractors {
   private[extractors] def findRelatedComment(source: scala.meta.Source, t: scala.meta.Tree): Option[scala.meta.Token] = {
     val tokens = t.tokens
     val tokenIdx = source.tokens.indexOf(tokens(0))
-    source.tokens.take(tokenIdx).reverse.find(_.name == "comment")
+    source.tokens.take(tokenIdx).reverse.find(_.is[Token.Comment])
   }
 
   private[extractors] sealed trait Tag

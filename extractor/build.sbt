@@ -4,7 +4,7 @@ name := "metarpheus"
 
 version       := "0.1.0"
 
-scalaVersion  := "2.11.7"
+scalaVersion  := "2.12.1"
 
 scalacOptions := Seq("-unchecked",
                      "-deprecation",
@@ -12,16 +12,15 @@ scalacOptions := Seq("-unchecked",
                      "-feature")
 
 resolvers ++= Seq(
-  Resolver.sonatypeRepo("snapshots"),
-  DefaultMavenRepository
+  Resolver.sonatypeRepo("releases")
 )
 
 libraryDependencies ++= Seq(
-  "org.scalameta" % "scalameta" % "0.20.0" cross CrossVersion.binary,
+  "org.scalameta" %% "scalameta" % "1.5.0",
   "org.rogach" %% "scallop" % "1.0.0",
-  "org.json4s" %% "json4s-jackson" % "3.2.11",
-  "com.twitter" %% "util-eval" % "6.33.0",
-  "org.scalatest" %% "scalatest" % "2.1.3" % "test"
+  "org.json4s" %% "json4s-jackson" % "3.5.0",
+  "com.twitter" %% "util-eval" % "6.41.0",
+  "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 )
 
 bintrayOrganization := Some("buildo")
