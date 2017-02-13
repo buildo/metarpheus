@@ -163,7 +163,7 @@ class ControllerSuite extends FunSuite {
           ),
           authenticated = false,
           returns = Type.Name("Camping"),
-          body = None, // TODO: Some(Route.Body(Type.Name("Camping"),None)),
+          body = None,
           ctrl = List("campingController", "create"),
           desc = Some("create a camping"),
           name = List("campingController", "create")
