@@ -44,7 +44,15 @@ package object controller {
           Type.Apply(
             Type.Name("Either"),
             Seq(_, tpe)))) => tpeToIntermediate(tpe)
-    }.headOption.getOrElse(intermediate.Type.Name("UNKNOWN"))
+    }.headOption.getOrElse {
+        throw new Exception(s"""
+          |This method misses an explicit return type
+          |
+          |  ${m.syntax}
+          |
+          |It should be in the form of Future[Either[A, B]].
+        """.stripMargin)
+      }
 
   def extractAllRoutes(source: Source): List[intermediate.Route] =
     source.collect { case t: Defn.Trait => t }.flatMap(t => extractRoute(source, t))
