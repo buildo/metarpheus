@@ -58,6 +58,7 @@ package object extractors {
       intermediate.Type.Name(name.value)
     case scala.meta.Type.Apply(name: scala.meta.Type.Name, args) =>
       intermediate.Type.Apply(name.value, args.map(tpeToIntermediate))
+    case scala.meta.Type.Select(_, t) => tpeToIntermediate(t)
   }
 
   private[extractors] def stripCommentMarkers(s: String) =

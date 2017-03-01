@@ -9,7 +9,7 @@ package models
  * @param location camping location
  * @param rating camping rating
  */
-case class Camping(name: String, size: Int, location: CampingLocation, rating: CampingRating)
+case class Camping(id: java.util.UUID, name: String, size: Int, location: CampingLocation, rating: CampingRating)
 
 /**
   *  Represents a swan
