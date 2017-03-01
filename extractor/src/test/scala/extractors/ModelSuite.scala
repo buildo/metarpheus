@@ -21,6 +21,10 @@ class ModelSuite extends FunSuite {
           name = "Camping",
           members = List(
             CaseClass.Member(
+              name = "id",
+              tpe = Type.Name("UUID"),
+              desc = None),
+            CaseClass.Member(
               name = "name",
               tpe = Type.Name("String"),
               desc = None),
