@@ -5,7 +5,7 @@ A configuration can be provided via `--config`. The file is expected to contain 
 # Build
 
 To obtain a `.jar`:
+
 ```sh
-cd extractor
 sbt assembly
 ```

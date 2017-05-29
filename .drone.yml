@@ -2,22 +2,20 @@ build:
   test:
     image: hseeberger/scala-sbt
     commands:
-      - cd extractor
       - sbt test -Dsbt.ivy.home=/drone/.ivy
 
   build:
     image: hseeberger/scala-sbt
     commands:
-      - cd extractor
-      - sbt assembly -Dsbt.ivy.home=/drone/.ivy
-      - mv target/scala-2.11/metarpheus-assembly-0.1.0.jar metarpheus.jar
+      - sbt core/assembly -Dsbt.ivy.home=/drone/.ivy
+      - mv core/target/scala-2.11/metarpheus-assembly-0.1.0.jar metarpheus.jar
     when:
       event: tag
 
 publish:
   github_release:
     api_key: $$GITHUB_TOKEN
-    files: extractor/metarpheus.jar
+    files: metarpheus.jar
 
 cache:
   mount:
