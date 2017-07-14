@@ -2,7 +2,7 @@ build:
   test:
     image: hseeberger/scala-sbt
     commands:
-      - sbt test -Dsbt.ivy.home=/drone/.ivy
+      - sbt core/test -Dsbt.ivy.home=/drone/.ivy
 
   build:
     image: hseeberger/scala-sbt
