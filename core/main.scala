@@ -8,7 +8,7 @@ class CommandLine(args: Array[String]) extends ScallopConf(args) {
   val configPath = opt[String]("config", descr = "config file path", required = false)
   val outputFile = opt[String]("output", descr = "output file path", required = false)
   val wiro = opt[Boolean]("wiro", descr = "parse wiro-style", required = false)
-  val directories = trailArg[List[String]](required = true)
+  val targets = trailArg[List[String]](required = true)
   verify()
 }
 
@@ -23,19 +23,23 @@ object main {
   def main(argv: Array[String]) = {
     val conf = new CommandLine(argv)
 
-    def recursivelyListFiles(f: File): Array[File] = {
-      val these: Array[java.io.File] = Option(f.listFiles).getOrElse(Array())
-      these ++ these.filter(_.isDirectory).flatMap(recursivelyListFiles)
+    def recursivelyListFiles(target: File): Array[File] = {
+      if (target.isDirectory) {
+        val these: Array[java.io.File] = Option(target.listFiles).getOrElse(Array())
+        these ++ these.filter(_.isDirectory).flatMap(recursivelyListFiles)
+      } else {
+        Array(target)
+      }
     }
 
-    val files = (conf.directories.get.get: List[String]).map { dir =>
-      val file = new File(dir)
-      if (!file.exists) {
+    val files = (conf.targets.get.get: List[String]).map { target =>
+      val fileOrDir = new File(target)
+      if (!fileOrDir.exists) {
         throw new Exception("The provided file or folder does not exist")
       }
-      recursivelyListFiles(file)
+      recursivelyListFiles(fileOrDir)
     }.flatten.filter(_.getName.endsWith(".scala")).toList
-
+    
     val parsed: List[scala.meta.Source] = files.map(parse)
 
     val config = conf.configPath.get.map { fileName =>
