@@ -52,7 +52,9 @@ lazy val cli = project
     libraryDependencies ++= Seq(
       "org.rogach" %% "scallop" % "1.0.0",
       "org.json4s" %% "json4s-jackson" % "3.5.0",
-      "com.twitter" %% "util-eval" % "6.41.0",
+      "io.circe" %% "circe-core" % "0.8.0",
+      "io.circe" %% "circe-generic-extras" % "0.8.0",
+      "io.circe" %% "circe-parser" % "0.8.0",
       "org.scalatest" %% "scalatest" % "3.0.1" % Test
     )
   )

@@ -2,10 +2,12 @@ package io.buildo.metarpheus
 package cli
 
 import java.io.File
+import scala.io.Source
 
 import org.rogach.scallop._
-
-import scala.io.Source
+import io.circe.parser.decode
+import io.circe.generic.extras._
+import io.circe.generic.extras.auto._
 
 class CommandLine(args: Array[String]) extends ScallopConf(args) {
   val configPath = opt[String]("config", descr = "config file path", required = false)
@@ -30,14 +32,16 @@ object Cli {
     
     val sources = files.map(Source.fromFile(_).mkString)
 
-    val config = conf.configPath.get.map { fileName =>
-      val eval = new com.twitter.util.Eval(None)
-      eval.apply(new File(fileName)): core.Config
-    }.getOrElse(core.DefaultConfig)
+    implicit val parseConfig: Configuration = Configuration.default.withDefaults
+    val config = (for {
+      fileName <- conf.configPath.get
+      json = Source.fromFile(fileName).mkString
+      parsed <- decode[core.Config](json).toOption
+    } yield parsed).getOrElse(core.Config.default)
 
     val wiro = conf.wiro.get.getOrElse(false)
 
-    val api = core.Metarpheus.run(sources, config, wiro)
+    val api = core.Metarpheus.run(sources, config.copy(wiro = wiro))
 
     val serializedAPI = repr.serializeAPI(api)
 
