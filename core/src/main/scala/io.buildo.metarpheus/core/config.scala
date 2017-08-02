@@ -1,4 +1,5 @@
-package morpheus
+package io.buildo.metarpheus
+package core
 
 trait Config {
   val routeMatcherToIntermediate: PartialFunction[(String, Option[intermediate.Type]), intermediate.Type]

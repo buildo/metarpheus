@@ -1,8 +1,8 @@
-package morpheus
+package io.buildo.metarpheus
+package core
 package extractors
 
 import scala.meta._
-import scala.meta.dialects.Scala211
 
 package object route {
 

@@ -1,20 +1,24 @@
-package morpheus.extractors
+package io.buildo.metarpheus
+package core
+package test
 
 import org.scalatest._
+
+import extractors._
 
 class ApiSuite extends FunSuite {
   lazy val parsed = {
     import scala.meta._
     import scala.meta.dialects.Scala211
     List(
-      morpheus.Fixtures.models.parse[Source].get,
-      morpheus.Fixtures.routes.parse[Source].get,
-      morpheus.Fixtures.controllers.parse[Source].get
+      Fixtures.models.parse[Source].get,
+      Fixtures.routes.parse[Source].get,
+      Fixtures.controllers.parse[Source].get
     )
   }
 
   test("extract used models") {
-    import morpheus.intermediate._
+    import intermediate._
 
     val api = extractFullAPI(parsed, Common.overrides, Common.routeMatcherToTpe, Common.authRouteTermNames, wiro = false)
       .stripUnusedModels(Common.modelsForciblyInUse)
@@ -26,7 +30,7 @@ class ApiSuite extends FunSuite {
   }
 
   test("extract wiro style") {
-    import morpheus.intermediate._
+    import intermediate._
 
     val api = extractFullAPI(parsed, Common.overrides, Common.routeMatcherToTpe, Common.authRouteTermNames, wiro = true)
       .stripUnusedModels(Common.modelsForciblyInUse)

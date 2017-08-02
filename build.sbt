@@ -28,23 +28,32 @@ lazy val root = project.in(file("."))
   .aggregate(annotations)
   .dependsOn(annotations)
 
-lazy val core = project
+lazy val annotations = project
   .settings(commonSettings)
   .settings(
-    name := "metarpheus",
-    resolvers += Resolver.bintrayIvyRepo("scalameta", "maven"),
+    name := "metarpheus-annotations"
+  )
+
+lazy val core = project
+  .settings(
+    commonSettings,
+    name := "metarpheus-core",
     libraryDependencies ++= Seq(
       "org.scalameta" %% "scalameta" % "1.6.0",
       "org.scalameta" %% "contrib" % "1.6.0",
+      "org.scalatest" %% "scalatest" % "3.0.1" % Test
+    )
+  )
+
+lazy val cli = project
+  .settings(
+    commonSettings,
+    name := "metarpheus-cli",
+    libraryDependencies ++= Seq(
       "org.rogach" %% "scallop" % "1.0.0",
       "org.json4s" %% "json4s-jackson" % "3.5.0",
       "com.twitter" %% "util-eval" % "6.41.0",
       "org.scalatest" %% "scalatest" % "3.0.1" % Test
     )
   )
-
-lazy val annotations = project
-  .settings(commonSettings)
-  .settings(
-    name := "metarpheus-annotations"
-  )
+  .dependsOn(core)

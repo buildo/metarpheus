@@ -1,8 +1,7 @@
-package morpheus
+package io.buildo.metarpheus
+package core
 
-import scala.meta._
-import scala.meta.dialects.Scala211
-import scala.meta.tokens.Token.Comment
+import scala.meta.{Type, Term, Syntax}
 import scala.meta.contrib.AssociatedComments
 
 package object extractors {
@@ -30,8 +29,6 @@ package object extractors {
 
     intermediate API(models, routes)
   }
-
-  // shared utility functions for the extractors package
 
   /**
    * Extract all terms from a sequence of applications of an infix operator

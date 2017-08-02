@@ -1,8 +1,11 @@
-package morpheus
+package io.buildo.metarpheus
+package cli
 
 import java.io.File
 
 import org.rogach.scallop._
+
+import scala.io.Source
 
 class CommandLine(args: Array[String]) extends ScallopConf(args) {
   val configPath = opt[String]("config", descr = "config file path", required = false)
@@ -12,25 +15,10 @@ class CommandLine(args: Array[String]) extends ScallopConf(args) {
   verify()
 }
 
-object main {
+object Cli {
 
-  private def parse(file: java.io.File): scala.meta.Source = {
-    import scala.meta._
-    import scala.meta.dialects.Scala211
-    file.parse[Source].get
-  }
-
-  def main(argv: Array[String]) = {
+  def main(argv: Array[String]): Unit = {
     val conf = new CommandLine(argv)
-
-    def recursivelyListFiles(target: File): Array[File] = {
-      if (target.isDirectory) {
-        val these: Array[java.io.File] = Option(target.listFiles).getOrElse(Array())
-        these ++ these.filter(_.isDirectory).flatMap(recursivelyListFiles)
-      } else {
-        Array(target)
-      }
-    }
 
     val files = (conf.targets.get.get: List[String]).map { target =>
       val fileOrDir = new File(target)
@@ -40,21 +28,16 @@ object main {
       recursivelyListFiles(fileOrDir)
     }.flatten.filter(_.getName.endsWith(".scala")).toList
     
-    val parsed: List[scala.meta.Source] = files.map(parse)
+    val sources = files.map(Source.fromFile(_).mkString)
 
     val config = conf.configPath.get.map { fileName =>
       val eval = new com.twitter.util.Eval(None)
-      eval.apply(new File(fileName)) : Config
-    }.getOrElse(DefaultConfig)
+      eval.apply(new File(fileName)): core.Config
+    }.getOrElse(core.DefaultConfig)
 
     val wiro = conf.wiro.get.getOrElse(false)
 
-    val api = extractors.extractFullAPI(parsed,
-      config.routeOverrides,
-      config.routeMatcherToIntermediate,
-      config.authRouteTermNames,
-      wiro
-    ).stripUnusedModels(config.modelsForciblyInUse)
+    val api = core.Metarpheus.run(sources, config, wiro)
 
     val serializedAPI = repr.serializeAPI(api)
 
@@ -69,7 +52,15 @@ object main {
     }
 
     println(serializedAPI)
+  }
 
+  private[this] def recursivelyListFiles(target: File): Array[File] = {
+    if (target.isDirectory) {
+      val these: Array[java.io.File] = Option(target.listFiles).getOrElse(Array())
+      these ++ these.filter(_.isDirectory).flatMap(recursivelyListFiles)
+    } else {
+      Array(target)
+    }
   }
 
 }

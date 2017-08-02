@@ -1,13 +1,16 @@
-package morpheus.extractors
-package route
+package io.buildo.metarpheus
+package core
+package test
 
 import org.scalatest._
 
-class RouteSuite extends FunSuite {
+import extractors._
+
+class ControllerSuite extends FunSuite {
   lazy val parsed = {
     import scala.meta._
     import scala.meta.dialects.Scala211
-    morpheus.Fixtures.routes.parse[Source].get
+    Fixtures.controllers.parse[Source].get
   }
 
   test("parse successfully") {
@@ -15,18 +18,19 @@ class RouteSuite extends FunSuite {
   }
 
   test("extract routes from fixture code") {
-    import morpheus.intermediate._
+    import intermediate._
 
     val models = model.extractModel(parsed)
-    val caseClasses = models.collect { case x: morpheus.intermediate.CaseClass => x }
-    val result = extractAllRoutes(caseClasses, Common.overrides, Common.routeMatcherToTpe, Common.authRouteTermNames)(parsed)
+    val caseClasses = models.collect { case x: CaseClass => x }
+    val result = controller.extractAllRoutes(parsed)
 
     assert(result.toString ===
       List(
         Route(
           method = "get",
           route = List(
-            RouteSegment.String("campings")
+            RouteSegment.String("campings"),
+            RouteSegment.String("getByCoolnessAndSize")
           ),
           params = List(
             RouteParam(
@@ -58,7 +62,8 @@ class RouteSuite extends FunSuite {
         Route(
           method = "get",
           route = List(
-            RouteSegment.String("campings")
+            RouteSegment.String("campings"),
+            RouteSegment.String("getBySizeAndDistance")
           ),
           params = List(
             RouteParam(
@@ -85,14 +90,16 @@ class RouteSuite extends FunSuite {
           method = "get",
           route = List(
             RouteSegment.String("campings"),
-            RouteSegment.Param(RouteParam(
+            RouteSegment.String("getById")
+          ),
+          params = List(
+            RouteParam(
               Some("id"),
               Type.Name("Int"),
               true,
               Some("camping id")
-            ))
+            )
           ),
-          params = List(),
           authenticated = true,
           returns = Type.Name("Camping"),
           body = None,
@@ -104,14 +111,16 @@ class RouteSuite extends FunSuite {
           method = "get",
           route = List(
             RouteSegment.String("campings"),
-            RouteSegment.Param(RouteParam(
-              None,
+            RouteSegment.String("getByTypedId")
+          ),
+          params = List(
+            RouteParam(
+              Some("id"),
               Type.Apply("Id", Seq(Type.Name("Camping"))),
               true,
               None
-            ))
+            )
           ),
-          params = List(),
           authenticated = true,
           returns = Type.Name("Camping"),
           body = None,
@@ -122,7 +131,8 @@ class RouteSuite extends FunSuite {
         Route(
           method = "get",
           route = List(
-            RouteSegment.String("campings")
+            RouteSegment.String("campings"),
+            RouteSegment.String("getByHasBeach")
           ),
           params = List(
             RouteParam(
@@ -142,46 +152,28 @@ class RouteSuite extends FunSuite {
         Route(
           method = "post",
           route = List(
-            RouteSegment.String("campings")
-          ),
-          params = List(),
-          authenticated = false,
-          returns = Type.Name("Camping"),
-          body = Some(Route.Body(Type.Name("Camping"),None)),
-          ctrl = List("campingController", "create"),
-          desc = Some("create a camping"),
-          name = List("campingController", "create")
-        ),
-        Common.overridableOverride,
-        Route(
-          method = "get",
-          route = List(
             RouteSegment.String("campings"),
-            RouteSegment.String("by_query")
+            RouteSegment.String("create")
           ),
           params = List(
             RouteParam(
-              Some("coolness"),
-              Type.Name("String"),
-              false,
-              Some("how cool it is")
-            ),
-            RouteParam(
-              Some("size"),
-              Type.Name("Int"),
+              Some("camping"),
+              Type.Name("Camping"),
               true,
-              Some("the number of tents")
+              None,
+              inBody = true
             )
           ),
-          authenticated = true,
-          returns = Type.Apply("List", List(Type.Name("Camping"))),
+          authenticated = false,
+          returns = Type.Name("Camping"),
           body = None,
-          ctrl = List("campingController", "getByQuery"),
-          desc = Some("get multiple campings by params with case class"),
-          name = List("campingController", "getByQuery")
+          ctrl = List("campingController", "create"),
+          desc = Some("create a camping"),
+          name = List("campingController", "create")
         )
       ).toString
     )
 
   }
 }
+
