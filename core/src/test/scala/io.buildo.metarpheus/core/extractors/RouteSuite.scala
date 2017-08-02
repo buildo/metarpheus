@@ -21,7 +21,7 @@ class RouteSuite extends FunSuite {
 
     val models = model.extractModel(parsed)
     val caseClasses = models.collect { case x: CaseClass => x }
-    val result = route.extractAllRoutes(caseClasses, Common.overrides, Common.routeMatcherToTpe, Common.authRouteTermNames)(parsed)
+    val result = route.extractAllRoutes(caseClasses, Common.authRouteTermNames)(parsed)
 
     assert(result.toString ===
       List(
@@ -154,7 +154,6 @@ class RouteSuite extends FunSuite {
           desc = Some("create a camping"),
           name = List("campingController", "create")
         ),
-        Common.overridableOverride,
         Route(
           method = "get",
           route = List(

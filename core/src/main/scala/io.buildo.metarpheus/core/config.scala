@@ -1,17 +1,17 @@
 package io.buildo.metarpheus
 package core
 
-trait Config {
-  val routeMatcherToIntermediate: PartialFunction[(String, Option[intermediate.Type]), intermediate.Type]
+import io.circe._
+import io.circe.generic.auto._
+import io.circe.syntax._
 
-  val routeOverrides: Map[List[String], intermediate.Route] = Map()
+case class Config(
+  authRouteTermNames: List[String] = Nil,
+  modelsForciblyInUse: Set[String] = Set.empty,
+  wiro: Boolean = false
+) extends LegacyConfig
 
-  val authRouteTermNames: List[String] = Nil
-
-  val modelsForciblyInUse: Set[String] = Set.empty
-}
-
-object DefaultConfig extends Config {
-  val routeMatcherToIntermediate = PartialFunction.empty
-  override val authRouteTermNames = List("withUserAuthentication")
+trait LegacyConfig {
+  val routeOverrides: Map[List[String], intermediate.Route] = Map.empty
+  val routeMatcherToIntermediate: PartialFunction[(String, Option[intermediate.Type]), intermediate.Type] = PartialFunction.empty
 }

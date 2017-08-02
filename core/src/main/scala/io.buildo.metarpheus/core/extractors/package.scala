@@ -8,8 +8,6 @@ package object extractors {
 
   def extractFullAPI(
     parsed: List[scala.meta.Source],
-    routeOverrides: Map[List[String], intermediate.Route],
-    routeMatcherToIntermediate: PartialFunction[(String, Option[intermediate.Type]), intermediate.Type],
     authRouteTermNames: List[String],
     wiro: Boolean
   ): intermediate.API = {
@@ -24,7 +22,7 @@ package object extractors {
       if (wiro) {
         parsed.flatMap(extractors.controller.extractAllRoutes)
       } else {
-        parsed.flatMap(extractors.route.extractAllRoutes(caseClasses, routeOverrides, routeMatcherToIntermediate, authRouteTermNames))
+        parsed.flatMap(extractors.route.extractAllRoutes(caseClasses, authRouteTermNames))
       }
 
     intermediate API(models, routes)
@@ -56,6 +54,11 @@ package object extractors {
     case scala.meta.Type.Apply(name: scala.meta.Type.Name, args) =>
       intermediate.Type.Apply(name.value, args.map(tpeToIntermediate))
     case scala.meta.Type.Select(_, t) => tpeToIntermediate(t)
+  }
+
+  private[extractors] def tpeToIntermediate(t: Term.ApplyType): intermediate.Type = t match {
+    case Term.ApplyType(name: Term.Name, targs) =>
+      intermediate.Type.Apply(name.value, t.targs.map(tpeToIntermediate))
   }
 
   private[extractors] def stripCommentMarkers(s: String) =
