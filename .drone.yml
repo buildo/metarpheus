@@ -3,12 +3,13 @@ build:
     image: hseeberger/scala-sbt
     commands:
       - sbt core/test -Dsbt.ivy.home=/drone/.ivy
+      - sbt cli/test -Dsbt.ivy.home=/drone/.ivy
 
   build:
     image: hseeberger/scala-sbt
     commands:
-      - sbt core/assembly -Dsbt.ivy.home=/drone/.ivy
-      - mv core/target/scala-2.12/metarpheus-assembly-$$TAG.jar metarpheus.jar
+      - sbt cli/assembly -Dsbt.ivy.home=/drone/.ivy
+      - mv cli/target/scala-2.12/metarpheus-cli-assembly-$$TAG.jar metarpheus.jar
     when:
       event: tag
 

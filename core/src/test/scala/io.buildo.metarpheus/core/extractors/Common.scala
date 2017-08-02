@@ -1,6 +1,8 @@
-package morpheus.extractors
+package io.buildo.metarpheus
+package core
+package test
 
-import morpheus.intermediate._
+import intermediate._
 
 object Common {
     val overridableOverride = Route(

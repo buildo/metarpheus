@@ -1,4 +1,5 @@
-package morpheus
+package io.buildo.metarpheus
+package cli
 
 package object repr {
 
@@ -9,6 +10,6 @@ package object repr {
 
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  def serializeAPI(api: intermediate.API): String = pretty(Extraction.decompose(api))
+  def serializeAPI(api: core.intermediate.API): String = pretty(Extraction.decompose(api))
 
 }

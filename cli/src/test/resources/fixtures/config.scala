@@ -1,5 +1,5 @@
-new morpheus.Config {
-  import morpheus.intermediate._
+new io.buildo.metarpheus.core.Config {
+  import io.buildo.metarpheus.core.intermediate._
 
   val routeMatcherToIntermediate = PartialFunction[(String, Option[Type]), Type] {
     case ("Id", Some(x@Type.Name(_))) => Type.Apply("Id", Seq(x))

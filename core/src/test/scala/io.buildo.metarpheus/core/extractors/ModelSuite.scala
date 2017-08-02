@@ -1,19 +1,22 @@
-package morpheus.extractors
-package model
+package io.buildo.metarpheus
+package core
+package test
 
 import org.scalatest._
+
+import extractors._
 
 class ModelSuite extends FunSuite {
   lazy val parsed = {
     import scala.meta._
     import scala.meta.dialects.Scala211
-    morpheus.Fixtures.models.parse[Source].get
+    Fixtures.models.parse[Source].get
   }
 
   test("extract case classes") {
-    val result = extractModel(parsed)
+    val result = model.extractModel(parsed)
 
-    import morpheus.intermediate._
+    import intermediate._
 
     assert(result ===
       List(

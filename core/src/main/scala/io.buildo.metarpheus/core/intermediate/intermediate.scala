@@ -1,5 +1,5 @@
-package morpheus
-package intermediate
+package io.buildo.metarpheus
+package core.intermediate
 
 import scala.annotation.tailrec
 
@@ -63,7 +63,7 @@ case class API(
   routes: List[Route]) {
 
   def stripUnusedModels(modelsForciblyInUse: Set[String] = Set.empty): API = {
-    val modelsInUse: Set[intermediate.Type] = {
+    val modelsInUse: Set[Type] = {
       routes.flatMap { route =>
         route.route.collect {
           case RouteSegment.Param(routeParam) => routeParam.tpe
@@ -74,17 +74,17 @@ case class API(
       }
     }.toSet
 
-    def inUseConcreteTypeNames(models: Set[intermediate.Type]): Set[String] = {
-      def recurse(t: intermediate.Type): List[intermediate.Type.Name] = t match {
-        case name: intermediate.Type.Name => List(name)
-        case intermediate.Type.Apply(_, args) => args.flatMap(recurse).toList
+    def inUseConcreteTypeNames(models: Set[Type]): Set[String] = {
+      def recurse(t: Type): List[Type.Name] = t match {
+        case name: Type.Name => List(name)
+        case Type.Apply(_, args) => args.flatMap(recurse).toList
       }
       models.flatMap(recurse)
     }.map(_.name).toSet
 
     // recursively search for types in use till fixpoint is reached
     @tailrec
-    def fixpoint(inUse: Set[intermediate.Type]): Set[String] = {
+    def fixpoint(inUse: Set[Type]): Set[String] = {
       val newInUse = inUse ++
         models.filter(m => inUseConcreteTypeNames(inUse).contains(m.name)).collect {
           case CaseClass(_, members, _) => members.map(_.tpe)
