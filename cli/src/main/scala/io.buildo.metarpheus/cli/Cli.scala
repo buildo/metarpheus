@@ -31,23 +31,23 @@ object Cli {
       parsed <- decode[core.Config](json).toOption
     } yield parsed).getOrElse(core.Config.default)
 
-    val wiro = conf.wiro.get.getOrElse(false)
+    val wiro = conf.wiro.get.getOrElse(config.wiro)
 
     val api = core.Metarpheus.run(paths, config.copy(wiro = wiro))
 
     val serializedAPI = repr.serializeAPI(api)
 
-    conf.outputFile.get.map { outputFilePath =>
-      val f = new File(outputFilePath)
-      val p = new java.io.PrintWriter(f)
-      try {
-        p.println(serializedAPI)
-      } finally {
-        p.close()
-      }
+    conf.outputFile.get match {
+      case None => println(serializedAPI)
+      case Some(outputFilePath) =>
+        val f = new File(outputFilePath)
+        val p = new java.io.PrintWriter(f)
+        try {
+          p.println(serializedAPI)
+        } finally {
+          p.close()
+        }
     }
-
-    println(serializedAPI)
   }
 
   private[this] def recursivelyListFiles(target: File): Array[File] = {
