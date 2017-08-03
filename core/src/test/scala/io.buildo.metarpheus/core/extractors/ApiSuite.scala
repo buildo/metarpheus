@@ -20,7 +20,7 @@ class ApiSuite extends FunSuite {
   test("extract used models") {
     import intermediate._
 
-    val api = extractFullAPI(parsed, Common.overrides, Common.routeMatcherToTpe, Common.authRouteTermNames, wiro = false)
+    val api = extractFullAPI(parsed, Common.authRouteTermNames, wiro = false)
       .stripUnusedModels(Common.modelsForciblyInUse)
 
     assert(api.models.collectFirst {
@@ -32,7 +32,7 @@ class ApiSuite extends FunSuite {
   test("extract wiro style") {
     import intermediate._
 
-    val api = extractFullAPI(parsed, Common.overrides, Common.routeMatcherToTpe, Common.authRouteTermNames, wiro = true)
+    val api = extractFullAPI(parsed, Common.authRouteTermNames, wiro = true)
       .stripUnusedModels(Common.modelsForciblyInUse)
 
     assert(api.routes.collectFirst {

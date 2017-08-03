@@ -164,8 +164,8 @@ package object route {
    */
   def extractRoute(
     aliases: Map[String, Alias],
-    models: List[intermediate.CaseClass],
-    routeMatcherToIntermediate: PartialFunction[(String, Option[intermediate.Type]), intermediate.Type])(
+    models: List[intermediate.CaseClass]
+  )( 
     route: RouteTermInfo,
     routeCommentInfo: RouteCommentInfo): intermediate.Route = {
 
@@ -249,16 +249,15 @@ package object route {
             case Term.Name(segmentMatcher) =>
               intermediate.RouteSegment.Param(intermediate.RouteParam(
                 name = None,
-                tpe = defaultRouteMatchers.get(segmentMatcher).getOrElse(
-                  routeMatcherToIntermediate((segmentMatcher, None))),
+                tpe = defaultRouteMatchers(segmentMatcher),
                 required = true,
                 desc = None))
             case Lit(stringSegm: String) =>
               intermediate.RouteSegment.String(stringSegm)
-            case Term.ApplyType(Term.Name(segmentMatcher), Seq(typ)) =>
+            case t @ Term.ApplyType(Term.Name(segmentMatcher), _) =>
               intermediate.RouteSegment.Param(intermediate.RouteParam(
                 name = None,
-                tpe = routeMatcherToIntermediate((segmentMatcher, Some(tpeToIntermediate(typ)))),
+                tpe = tpeToIntermediate(t),
                 required = true,
                 desc = None))
           }
@@ -321,12 +320,11 @@ package object route {
 
   }
 
-  def extractAllRoutes(models: List[intermediate.CaseClass], overrides: Map[List[String], intermediate.Route], routeMatcherToIntermediate: PartialFunction[(String, Option[intermediate.Type]), intermediate.Type], authRouteTermNames: List[String])(f: scala.meta.Source): List[intermediate.Route] = {
+  def extractAllRoutes(models: List[intermediate.CaseClass], authRouteTermNames: List[String])(f: scala.meta.Source): List[intermediate.Route] = {
     val aliases = extractAliases(f)
     extractRouteTerms(f, authRouteTermNames).map { routeTerm =>
       val routeCommentInfo = extractRouteCommentInfo(routeTerm.routeTpe)
-      routeCommentInfo.routeName.flatMap(overrides.get _)
-        .getOrElse(extractRoute(aliases, models, routeMatcherToIntermediate)(routeTerm, routeCommentInfo))
+      extractRoute(aliases, models)(routeTerm, routeCommentInfo)
     }
   }
 

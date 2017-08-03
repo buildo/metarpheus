@@ -61,10 +61,6 @@ trait CampingRouterModule extends io.buildo.base.MonadicCtrlRouterModule
       (post & pathEnd & entity(as[Camping]) /**
         create a camping
       */) (returns[Camping].ctrl(campingController.create _)) ~
-      (get & path("overridable") & something /**
-        overridable route
-        @name campingController.overridden
-      */) (returns[Camping].ctrl(campingController.something _)) ~
       withRole(Admin) { user =>
         (get & path("by_query") & params[GetByQueryParams] /**
           get multiple campings by params with case class
