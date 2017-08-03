@@ -22,15 +22,7 @@ object Cli {
   def main(argv: Array[String]): Unit = {
     val conf = new CommandLine(argv)
 
-    val files = (conf.targets.get.get: List[String]).map { target =>
-      val fileOrDir = new File(target)
-      if (!fileOrDir.exists) {
-        throw new Exception("The provided file or folder does not exist")
-      }
-      recursivelyListFiles(fileOrDir)
-    }.flatten.filter(_.getName.endsWith(".scala")).toList
-    
-    val sources = files.map(Source.fromFile(_).mkString)
+    val paths = conf.targets.get.get
 
     implicit val parseConfig: Configuration = Configuration.default.withDefaults
     val config = (for {
@@ -41,7 +33,7 @@ object Cli {
 
     val wiro = conf.wiro.get.getOrElse(false)
 
-    val api = core.Metarpheus.run(sources, config.copy(wiro = wiro))
+    val api = core.Metarpheus.run(paths, config.copy(wiro = wiro))
 
     val serializedAPI = repr.serializeAPI(api)
 
