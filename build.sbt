@@ -39,8 +39,8 @@ lazy val core = project
     commonSettings,
     name := "metarpheus-core",
     libraryDependencies ++= Seq(
-      "org.scalameta" %% "scalameta" % "1.6.0",
-      "org.scalameta" %% "contrib" % "1.6.0",
+      "org.scalameta" %% "scalameta" % "1.8.0",
+      "org.scalameta" %% "contrib" % "1.8.0",
       "org.scalatest" %% "scalatest" % "3.0.1" % Test
     )
   )

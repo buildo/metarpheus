@@ -116,11 +116,16 @@ package object route {
           List(Term.Block(List(t: Term)))
         ) if authRouteTermNames.contains(termName) => recurse(prefix)(t, true)
         case Term.Function(_, Term.Block(List(t: Term))) => recurse(prefix)(t, authenticated)
+        case Term.Function(_, t: Term.Apply) => recurse(prefix)(t, authenticated)
         case Term.Apply(routeTpe : Term.ApplyInfix, List(routeTerm : Term)) =>
           List(
             RouteTermInfo(prefix, authenticated, routeTpe, routeTerm)
           )
-        case otherwise => println(otherwise.show[Structure]); println(authRouteTermNames); ???
+        case otherwise =>
+          println(otherwise.structure)
+          println(otherwise.syntax)
+          println(authRouteTermNames)
+          ???
       }
     }
 
