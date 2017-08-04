@@ -34,7 +34,7 @@ lazy val annotations = project
     name := "metarpheus-annotations"
   )
 
-lazy val core = project
+lazy val core = crossProject
   .settings(
     commonSettings,
     name := "metarpheus-core",
@@ -44,6 +44,8 @@ lazy val core = project
       "org.scalatest" %% "scalatest" % "3.0.1" % Test
     )
   )
+lazy val coreJVM = core.jvm
+lazy val coreJS = core.js
 
 lazy val cli = project
   .settings(
@@ -58,4 +60,4 @@ lazy val cli = project
       "org.scalatest" %% "scalatest" % "3.0.1" % Test
     )
   )
-  .dependsOn(core)
+  .dependsOn(coreJVM)
