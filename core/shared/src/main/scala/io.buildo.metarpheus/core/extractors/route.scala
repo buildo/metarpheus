@@ -9,23 +9,28 @@ package object route {
   case class Alias(term: Term, desc: Option[String])
 
   /**
-   * Extract aliases: directives assigned to vals for use in routes.
-   */
+    * Extract aliases: directives assigned to vals for use in routes.
+    */
   def extractAliases(source: scala.meta.Source): Map[String, Alias] = {
 
-    source.collect {
-      case x: Defn.Val if x.mods.collectFirst {
-        case Mod.Annot(Ctor.Ref.Name("alias")) => ()
-      }.isDefined => x
-    }.map { case t@Defn.Val(
-        _,
-        List(Pat.Var.Term(Term.Name(name))),
-        _,
-        term: Term
-      ) =>
-      val comment = findRelatedComment(source, t)
-      (name, Alias(term, comment.map(token => stripCommentMarkers(token.show[Syntax]).trim)))
-    }.toMap
+    source
+      .collect {
+        case x: Defn.Val if x.mods.collectFirst {
+              case Mod.Annot(Ctor.Ref.Name("alias")) => ()
+            }.isDefined =>
+          x
+      }
+      .map {
+        case t @ Defn.Val(
+              _,
+              List(Pat.Var.Term(Term.Name(name))),
+              _,
+              term: Term
+            ) =>
+          val comment = findRelatedComment(source, t)
+          (name, Alias(term, comment.map(token => stripCommentMarkers(token.show[Syntax]).trim)))
+      }
+      .toMap
   }
 
   case class RouteTermInfo(
@@ -35,39 +40,42 @@ package object route {
     routeTerm: Term)
 
   /**
-   * Find a router definition in a source file and extract a list of routes to
-   * be parsed as a bundle of terms and metadata.
-   *
-   * routeTpe will contain the route directives
-   * routeTerm will contain the parameter the route directives are applied to
-   * (that is to say, the lambda to run when the route is matched).
-   *
-   * In the source:
-   *
-   * @publishRoute
-   * val route = {
-   *   (<routeTpe>) (<routeTerm>) ~
-   *   (<routeTpe>) (<routeTerm>) ~
-   *   ...
-   * }
-   *
-   * prefix will contain a list of all "pathPrefix"es encountered
-   * authenticated will be true if the "authenticated" param for @publishRoute
-   * is true or if a "withUserAuthentication" directive has been encountered
-   */
-  def extractRouteTerms(source: scala.meta.Source, authRouteTermNames: List[String]): List[RouteTermInfo] = {
+    * Find a router definition in a source file and extract a list of routes to
+    * be parsed as a bundle of terms and metadata.
+    *
+    * routeTpe will contain the route directives
+    * routeTerm will contain the parameter the route directives are applied to
+    * (that is to say, the lambda to run when the route is matched).
+    *
+    * In the source:
+    *
+    * @publishRoute
+    * val route = {
+    *   (<routeTpe>) (<routeTerm>) ~
+    *   (<routeTpe>) (<routeTerm>) ~
+    *   ...
+    * }
+    *
+    * prefix will contain a list of all "pathPrefix"es encountered
+    * authenticated will be true if the "authenticated" param for @publishRoute
+    * is true or if a "withUserAuthentication" directive has been encountered
+    */
+  def extractRouteTerms(
+    source: scala.meta.Source,
+    authRouteTermNames: List[String]): List[RouteTermInfo] = {
 
     val routesTerms: List[(Term, Boolean)] = // (term, authenticated)
       source.collect {
         case x: Defn.Val if x.mods.collectFirst {
-          case Mod.Annot(
-            Ctor.Ref.Name("publishRoute") |
-            Term.Apply(
-              Ctor.Ref.Name("publishRoute"),
-              _
-            )
-          ) => ()
-        }.isDefined => x
+              case Mod.Annot(
+                  Ctor.Ref.Name("publishRoute") | Term.Apply(
+                    Ctor.Ref.Name("publishRoute"),
+                    _
+                  )
+                  ) =>
+                ()
+            }.isDefined =>
+          x
       } match {
         case List(route) =>
           val Defn.Val(_, routePats, _, routeTerm) = route
@@ -75,49 +83,54 @@ package object route {
             case Term.Block(List(routeStat: Term)) => routeStat
             case routeStat: Term.Apply => routeStat
           }
-          val authenticated = route.mods.collectFirst {
-            case Mod.Annot(
-              Term.Apply(
-                Ctor.Ref.Name("publishRoute"),
-                appliedTo
-              )
-            ) if appliedTo.collectFirst {
-              case Term.Arg.Named(Term.Name("authenticated"), Lit(true)) => ()
-            }.isDefined => true
-          }.getOrElse(false)
+          val authenticated = route.mods
+            .collectFirst {
+              case Mod.Annot(
+                  Term.Apply(
+                    Ctor.Ref.Name("publishRoute"),
+                    appliedTo
+                  )
+                  ) if appliedTo.collectFirst {
+                    case Term.Arg.Named(Term.Name("authenticated"), Lit(true)) => ()
+                  }.isDefined =>
+                true
+            }
+            .getOrElse(false)
           List((routeStat, authenticated))
         case Nil =>
           Nil
       }
 
-    def recurse(prefix: List[String])(routesTerm: Term, authenticated: Boolean
-      ): List[RouteTermInfo] = {
+    def recurse(
+      prefix: List[String])(routesTerm: Term, authenticated: Boolean): List[RouteTermInfo] = {
 
       val routeTerms = getAllInfix(routesTerm, "~")
 
       routeTerms.flatMap {
         case Term.Apply(
-          Term.Apply(
-            Term.Name("pathPrefix"),
-            List(Lit(addPrefix: String))
-          ),
-          List(Term.Block(List(t: Term)))
-        ) => recurse(prefix :+ addPrefix)(t, authenticated)
-        case x@(Term.Apply(
-          Term.Name(termName),
-          List(Term.Block(List(Term.Select(t: Term, _)))))
-        ) if authRouteTermNames.contains(termName) => recurse(prefix)(t, true)
+            Term.Apply(
+              Term.Name("pathPrefix"),
+              List(Lit(addPrefix: String))
+            ),
+            List(Term.Block(List(t: Term)))
+            ) =>
+          recurse(prefix :+ addPrefix)(t, authenticated)
+        case x @ (Term.Apply(Term.Name(termName), List(Term.Block(List(Term.Select(t: Term, _))))))
+            if authRouteTermNames.contains(termName) =>
+          recurse(prefix)(t, true)
         case Term.Apply(
-          Term.Apply(Term.Name(termName), _),
-          List(Term.Block(List(t: Term)))
-        ) if authRouteTermNames.contains(termName) => recurse(prefix)(t, true)
+            Term.Apply(Term.Name(termName), _),
+            List(Term.Block(List(t: Term)))
+            ) if authRouteTermNames.contains(termName) =>
+          recurse(prefix)(t, true)
         case Term.Apply(
-          Term.Apply(Term.Name(termName), _),
-          List(Term.Block(List(t: Term)))
-        ) if authRouteTermNames.contains(termName) => recurse(prefix)(t, true)
+            Term.Apply(Term.Name(termName), _),
+            List(Term.Block(List(t: Term)))
+            ) if authRouteTermNames.contains(termName) =>
+          recurse(prefix)(t, true)
         case Term.Function(_, Term.Block(List(t: Term))) => recurse(prefix)(t, authenticated)
         case Term.Function(_, t: Term.Apply) => recurse(prefix)(t, authenticated)
-        case Term.Apply(routeTpe : Term.ApplyInfix, List(routeTerm : Term)) =>
+        case Term.Apply(routeTpe: Term.ApplyInfix, List(routeTerm: Term)) =>
           List(
             RouteTermInfo(prefix, authenticated, routeTpe, routeTerm)
           )
@@ -150,11 +163,10 @@ package object route {
     routeName: Option[List[String]])
 
   /**
-   * Extract relevant information from the route comment.
-   */
+    * Extract relevant information from the route comment.
+    */
   def extractRouteCommentInfo(rtpe: Term.ApplyInfix): RouteCommentInfo = {
-    val (desc, tags) = extractDescAndTagsFromComment(
-      rtpe.tokens.find(_.is[Token.Comment]))
+    val (desc, tags) = extractDescAndTagsFromComment(rtpe.tokens.find(_.is[Token.Comment]))
 
     val paramDescs = tags.collect { case ParamDesc(name, d) => name -> d }.toMap
     val pathParamNamesAndDescs = tags.collect { case PathParamDesc(name, d) => name -> d }
@@ -164,15 +176,13 @@ package object route {
   }
 
   /**
-   * Extract the intermediate representation for a route from the output
-   * of extractRouteTerms
-   */
+    * Extract the intermediate representation for a route from the output
+    * of extractRouteTerms
+    */
   def extractRoute(
     aliases: Map[String, Alias],
     models: List[intermediate.CaseClass]
-  )( 
-    route: RouteTermInfo,
-    routeCommentInfo: RouteCommentInfo): intermediate.Route = {
+  )(route: RouteTermInfo, routeCommentInfo: RouteCommentInfo): intermediate.Route = {
 
     val RouteTermInfo(prefix, authenticated, rtpe, rterm) = route
 
@@ -181,8 +191,8 @@ package object route {
     val rdirs = getAllInfix(rtpe, "&")
 
     /**
-     * Represents the result of interpreting a directive
-     */
+      * Represents the result of interpreting a directive
+      */
     sealed trait DirOut
     case class Method(method: String) extends DirOut
     case class Param(p: intermediate.RouteParam) extends DirOut
@@ -190,7 +200,9 @@ package object route {
     case class Body(b: intermediate.Route.Body) extends DirOut
 
     def extractParamTerm(
-      applyType: Term.ApplyType, optional: Boolean, aliasDesc: Option[String]): intermediate.RouteParam = {
+      applyType: Term.ApplyType,
+      optional: Boolean,
+      aliasDesc: Option[String]): intermediate.RouteParam = {
 
       val Term.ApplyType(
         Term.Select(Lit(paramSym: scala.Symbol), Term.Name("as")),
@@ -231,7 +243,7 @@ package object route {
             case Lit(sym: scala.Symbol) => Param(extractSimpleParamTerm(sym.name, aliasDesc))
             case Lit(name: String) => Param(extractSimpleParamTerm(name, aliasDesc))
           }
-        case Term.Apply(Term.Select(p, Term.Name("as")), _)  => extract(p, aliasDesc)
+        case Term.Apply(Term.Select(p, Term.Name("as")), _) => extract(p, aliasDesc)
         case Term.ApplyType(Term.Name("params"), Seq(Type.Name(typeName))) =>
           models.find(_.name == typeName).get.members.map {
             case intermediate.CaseClass.Member(name, tpe, desc) =>
@@ -241,45 +253,46 @@ package object route {
                 case _ =>
                   (tpe, true)
               }
-              Param(intermediate.RouteParam(
-                name = Some(name),
-                tpe = paramTpe,
-                required = required,
-                desc = desc))
+              Param(
+                intermediate
+                  .RouteParam(name = Some(name), tpe = paramTpe, required = required, desc = desc))
           }
         case Term.Name("pathEnd" | "pathEndCommit") =>
           List(Route(Nil))
         case Term.Apply(Term.Name("path" | "pathCommit"), List(pathTerm: Term)) =>
           val route = getAllInfix(pathTerm, "/").map {
             case Term.Name(segmentMatcher) =>
-              intermediate.RouteSegment.Param(intermediate.RouteParam(
-                name = None,
-                tpe = defaultRouteMatchers(segmentMatcher),
-                required = true,
-                desc = None))
+              intermediate.RouteSegment.Param(
+                intermediate.RouteParam(
+                  name = None,
+                  tpe = defaultRouteMatchers(segmentMatcher),
+                  required = true,
+                  desc = None))
             case Lit(stringSegm: String) =>
               intermediate.RouteSegment.String(stringSegm)
             case t @ Term.ApplyType(Term.Name(segmentMatcher), _) =>
-              intermediate.RouteSegment.Param(intermediate.RouteParam(
-                name = None,
-                tpe = tpeToIntermediate(t),
-                required = true,
-                desc = None))
+              intermediate.RouteSegment.Param(intermediate
+                .RouteParam(name = None, tpe = tpeToIntermediate(t), required = true, desc = None))
           }
           val result = pathParamNamesAndDescs match {
             case Nil => route
-            case _ => (route.foldLeft((pathParamNamesAndDescs, List[intermediate.RouteSegment]())) {
-              case (((name, desc) :: pps, acc), intermediate.RouteSegment.Param(routeParam)) =>
-                (pps,
-                  acc :+ intermediate.RouteSegment.Param(routeParam.copy(name = Some(name), desc = desc)))
-              case ((pps, acc), segment) => (pps, acc :+ segment)
-            })._2
+            case _ =>
+              (route
+                .foldLeft((pathParamNamesAndDescs, List[intermediate.RouteSegment]())) {
+                  case (((name, desc) :: pps, acc), intermediate.RouteSegment.Param(routeParam)) =>
+                    (
+                      pps,
+                      acc :+ intermediate.RouteSegment.Param(
+                        routeParam.copy(name = Some(name), desc = desc)))
+                  case ((pps, acc), segment) => (pps, acc :+ segment)
+                })
+                ._2
           }
           List(Route(result))
-        case Term.Apply(Term.Name("entity" | "flatEntity"), List(Term.ApplyType(Term.Name("as" | "flatAs"), List(tpe: Type)))) =>
-          List(Body(intermediate.Route.Body(
-            tpeToIntermediate(tpe),
-            None)))
+        case Term.Apply(
+            Term.Name("entity" | "flatEntity"),
+            List(Term.ApplyType(Term.Name("as" | "flatAs"), List(tpe: Type)))) =>
+          List(Body(intermediate.Route.Body(tpeToIntermediate(tpe), None)))
         case Term.Name(name) if aliases.contains(name) =>
           extract(aliases(name).term, aliasDesc = aliases(name).desc)
         case Term.Apply(Term.Select(termAs, Term.Name("as")), _) =>
@@ -321,11 +334,13 @@ package object route {
       body = dirOut.collectFirst({ case Body(b) => b }),
       ctrl = ctrl,
       desc = desc,
-      name = routeName.getOrElse(ctrl))
+      name = routeName.getOrElse(ctrl)
+    )
 
   }
 
-  def extractAllRoutes(models: List[intermediate.CaseClass], authRouteTermNames: List[String])(f: scala.meta.Source): List[intermediate.Route] = {
+  def extractAllRoutes(models: List[intermediate.CaseClass], authRouteTermNames: List[String])(
+    f: scala.meta.Source): List[intermediate.Route] = {
     val aliases = extractAliases(f)
     extractRouteTerms(f, authRouteTermNames).map { routeTerm =>
       val routeCommentInfo = extractRouteCommentInfo(routeTerm.routeTpe)

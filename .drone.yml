@@ -2,6 +2,7 @@ build:
   test:
     image: hseeberger/scala-sbt
     commands:
+      - ./scalafmt --test
       - sbt coreJVM/test -Dsbt.ivy.home=/drone/.ivy
       - sbt cli/test -Dsbt.ivy.home=/drone/.ivy
 

@@ -36,10 +36,12 @@ class ApiSuite extends FunSuite {
       .stripUnusedModels(Common.modelsForciblyInUse)
 
     assert(api.routes.collectFirst {
+      // format: off
       case Route(get, List(
         RouteSegment.String("campings"),
         RouteSegment.String("getByCoolnessAndSize")
       ), _, _, _, _, _, _, _) => ()
+      // format: on
     }.isDefined)
   }
 

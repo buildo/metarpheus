@@ -1,7 +1,7 @@
 enablePlugins(GitVersioning)
 
 lazy val commonSettings = Seq(
-  organization  := "io.buildo",
+  organization := "io.buildo",
   scalaVersion := "2.12.1",
   crossScalaVersions := Seq("2.11.8", "2.12.1"),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
@@ -11,7 +11,8 @@ lazy val commonSettings = Seq(
   scalacOptions := Seq(
     "-unchecked",
     "-deprecation",
-    "-encoding", "utf8",
+    "-encoding",
+    "utf8",
     "-feature"
   )
 )
@@ -22,7 +23,8 @@ lazy val noPublishSettings = Seq(
   publishArtifact := false
 )
 
-lazy val root = project.in(file("."))
+lazy val root = project
+  .in(file("."))
   .settings(commonSettings)
   .settings(noPublishSettings)
   .aggregate(annotations)

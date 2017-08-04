@@ -25,20 +25,20 @@ package object extractors {
         parsed.flatMap(extractors.route.extractAllRoutes(caseClasses, authRouteTermNames))
       }
 
-    intermediate API(models, routes)
+    intermediate.API(models, routes)
   }
 
   /**
-   * Extract all terms from a sequence of applications of an infix operator
-   * (which translates to nested `ApplyInfix`es).
-   * e.g. getAllInfix(t1 + t2 + t3 + t4, "+") results in List(t1, t2, t3, t4)
-   */
+    * Extract all terms from a sequence of applications of an infix operator
+    * (which translates to nested `ApplyInfix`es).
+    * e.g. getAllInfix(t1 + t2 + t3 + t4, "+") results in List(t1, t2, t3, t4)
+    */
   private[extractors] def getAllInfix(ainfix: Term, op: String): List[Term] = {
     import scala.meta._
     ainfix match {
-      case Term.ApplyInfix(subinfix: Term.ApplyInfix, Term.Name(`op`), Nil, List(term : Term)) =>
+      case Term.ApplyInfix(subinfix: Term.ApplyInfix, Term.Name(`op`), Nil, List(term: Term)) =>
         getAllInfix(subinfix, `op`) :+ term
-      case Term.ApplyInfix(term1: Term, Term.Name(`op`), Nil, List(term2 : Term)) =>
+      case Term.ApplyInfix(term1: Term, Term.Name(`op`), Nil, List(term2: Term)) =>
         term1 :: term2 :: Nil
       case term: Term => term :: Nil
     }
@@ -72,7 +72,9 @@ package object extractors {
   /*
    * Search for the comment associated with this definition
    */
-  private[extractors] def findRelatedComment(source: scala.meta.Source, t: scala.meta.Tree): Option[scala.meta.Token] =
+  private[extractors] def findRelatedComment(
+    source: scala.meta.Source,
+    t: scala.meta.Tree): Option[scala.meta.Token] =
     AssociatedComments(source.tokens).leading(t).headOption
 
   private[extractors] sealed trait Tag
@@ -81,47 +83,51 @@ package object extractors {
   private[extractors] case class RouteName(name: List[String]) extends Tag
 
   /**
-   * Extract route description and tags (such as @param) from route comment
-   */
+    * Extract route description and tags (such as @param) from route comment
+    */
   private[extractors] def extractDescAndTagsFromComment(
     token: Option[scala.meta.Token]): (Option[String], List[Tag]) =
+    token
+      .map { c =>
+        val cleanLines = stripCommentMarkers(c.show[Syntax])
+          .split("\n")
+          .map(_.trim.stripPrefix("*").trim)
+          .filter(_ != "")
+          .toList
 
-    token.map { c =>
-      val cleanLines = stripCommentMarkers(c.show[Syntax])
-        .split("\n").map(_.trim.stripPrefix("*").trim)
-        .filter(_ != "").toList
+        val TagRegex = """@([^\s]+) (.*)""".r
+        val ParamRegex = """@param ([^\s]+) (.+)""".r
+        val ParamRegexNoDesc = """@param ([^\s]+)""".r
+        val PathParamRegex = """@pathParam ([^\s]+) (.+)""".r
+        val PathParamRegexNoDesc = """@pathParam ([^\s]+)""".r
+        val RouteNameRegex = """@name ([^\s]+)""".r
 
-      val TagRegex = """@([^\s]+) (.*)""".r
-      val ParamRegex = """@param ([^\s]+) (.+)""".r
-      val ParamRegexNoDesc = """@param ([^\s]+)""".r
-      val PathParamRegex = """@pathParam ([^\s]+) (.+)""".r
-      val PathParamRegexNoDesc = """@pathParam ([^\s]+)""".r
-      val RouteNameRegex = """@name ([^\s]+)""".r
+        val (desc, tagLines) = cleanLines.span(_ match {
+          case TagRegex(_, _) => false
+          case _ => true
+        })
 
-      val (desc, tagLines) = cleanLines.span(_ match {
-        case TagRegex(_, _) => false
-        case _ => true
-      })
-
-      @annotation.tailrec
-      def getTags(acc: List[Tag], lines: List[String]): List[Tag] = lines match {
-        case Nil => acc
-        case l :: ls => {
-          val (tagls, rest) = ls.span(_ match {
-            case TagRegex(tag, rest) => false
-            case _ => true
-          })
-          val next = l match {
-            case ParamRegex(name, l1) => ParamDesc(name, Some((l1 :: tagls).mkString(" ")))
-            case ParamRegexNoDesc(name) => ParamDesc(name, None)
-            case PathParamRegex(name, l1) => PathParamDesc(name, Some((l1 :: tagls).mkString(" ")))
-            case PathParamRegexNoDesc(name) => PathParamDesc(name, None)
-            case RouteNameRegex(name) => RouteName(name.split("""\.""").toList)
+        @annotation.tailrec
+        def getTags(acc: List[Tag], lines: List[String]): List[Tag] = lines match {
+          case Nil => acc
+          case l :: ls => {
+            val (tagls, rest) = ls.span(_ match {
+              case TagRegex(tag, rest) => false
+              case _ => true
+            })
+            val next = l match {
+              case ParamRegex(name, l1) => ParamDesc(name, Some((l1 :: tagls).mkString(" ")))
+              case ParamRegexNoDesc(name) => ParamDesc(name, None)
+              case PathParamRegex(name, l1) =>
+                PathParamDesc(name, Some((l1 :: tagls).mkString(" ")))
+              case PathParamRegexNoDesc(name) => PathParamDesc(name, None)
+              case RouteNameRegex(name) => RouteName(name.split("""\.""").toList)
+            }
+            getTags(acc :+ next, rest)
           }
-          getTags(acc :+ next, rest)
         }
-      }
 
-      (Some(desc.mkString(" ")), getTags(Nil, tagLines))
-    }.getOrElse((None, List()))
+        (Some(desc.mkString(" ")), getTags(Nil, tagLines))
+      }
+      .getOrElse((None, List()))
 }

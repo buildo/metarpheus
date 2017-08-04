@@ -3,13 +3,18 @@ package io.buildo.baseexample
 package models
 
 /**
- * Represents a camping site
- * @param name
- * @param size number of tents
- * @param location camping location
- * @param rating camping rating
- */
-case class Camping(id: java.util.UUID, name: String, size: Int, location: CampingLocation, rating: CampingRating)
+  * Represents a camping site
+  * @param name
+  * @param size number of tents
+  * @param location camping location
+  * @param rating camping rating
+  */
+case class Camping(
+  id: java.util.UUID,
+  name: String,
+  size: Int,
+  location: CampingLocation,
+  rating: CampingRating)
 
 /**
   *  Represents a swan

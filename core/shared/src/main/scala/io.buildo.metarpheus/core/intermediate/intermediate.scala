@@ -12,19 +12,13 @@ object Type {
 sealed trait Model {
   val name: String
 }
-case class CaseClass(
-  name: String,
-  members: List[CaseClass.Member],
-  desc: Option[String]) extends Model
+case class CaseClass(name: String, members: List[CaseClass.Member], desc: Option[String])
+    extends Model
 object CaseClass {
-  case class Member(
-    name: String, tpe: Type, desc: Option[String])
+  case class Member(name: String, tpe: Type, desc: Option[String])
 }
 
-case class CaseEnum(
-  name: String,
-  values: List[CaseEnum.Member],
-  desc: Option[String]) extends Model
+case class CaseEnum(name: String, values: List[CaseEnum.Member], desc: Option[String]) extends Model
 object CaseEnum {
   case class Member(name: String, desc: Option[String])
 }
@@ -58,9 +52,7 @@ object Route {
   case class Body(tpe: Type, desc: Option[String])
 }
 
-case class API(
-  models: List[Model],
-  routes: List[Route]) {
+case class API(models: List[Model], routes: List[Route]) {
 
   def stripUnusedModels(modelsForciblyInUse: Set[String] = Set.empty): API = {
     val modelsInUse: Set[Type] = {
@@ -68,9 +60,9 @@ case class API(
         route.route.collect {
           case RouteSegment.Param(routeParam) => routeParam.tpe
         } ++
-        route.params.map(_.tpe) ++
-        List(route.returns) ++
-        route.body.map(b => List(b.tpe)).getOrElse(Nil)
+          route.params.map(_.tpe) ++
+          List(route.returns) ++
+          route.body.map(b => List(b.tpe)).getOrElse(Nil)
       }
     }.toSet
 
@@ -86,9 +78,12 @@ case class API(
     @tailrec
     def fixpoint(inUse: Set[Type]): Set[String] = {
       val newInUse = inUse ++
-        models.filter(m => inUseConcreteTypeNames(inUse).contains(m.name)).collect {
-          case CaseClass(_, members, _) => members.map(_.tpe)
-        }.flatMap(o => o)
+        models
+          .filter(m => inUseConcreteTypeNames(inUse).contains(m.name))
+          .collect {
+            case CaseClass(_, members, _) => members.map(_.tpe)
+          }
+          .flatMap(o => o)
       if (newInUse == inUse) inUseConcreteTypeNames(inUse)
       else fixpoint(newInUse)
     }
@@ -98,7 +93,8 @@ case class API(
     // check models forcibly included are not already used by the routes
     val modelsIntersection = recursivelyUsedModels.intersect(modelsForciblyInUse)
     if (!modelsIntersection.isEmpty)
-      throw new Exception(s"The following models are already used by the routes, no need to force inclusion: $modelsIntersection")
+      throw new Exception(
+        s"The following models are already used by the routes, no need to force inclusion: $modelsIntersection")
 
     val inUseNames = recursivelyUsedModels ++ modelsForciblyInUse
 

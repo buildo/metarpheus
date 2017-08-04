@@ -22,16 +22,18 @@ object JSFacade {
   @JSExportTopLevel("run")
   def run(paths: js.Array[String], jsConfig: js.UndefOr[JSConfig]) = {
     implicit val circeConfiguration: Configuration = Configuration.default.withDefaults
-    val config = jsConfig.map { jsConfig =>
-      val json = js.JSON.stringify(jsConfig)
-      decode[Config](json) match {
-        case Left(error) => throw js.JavaScriptException(error.toString)
-        case Right(config) => config
+    val config = jsConfig
+      .map { jsConfig =>
+        val json = js.JSON.stringify(jsConfig)
+        decode[Config](json) match {
+          case Left(error) => throw js.JavaScriptException(error.toString)
+          case Right(config) => config
+        }
       }
-    }.getOrElse(Config.default)
+      .getOrElse(Config.default)
 
     val result = Metarpheus.run(paths.toList, config)
     js.JSON.parse(result.asJson.noSpaces)
   }
-  
+
 }
