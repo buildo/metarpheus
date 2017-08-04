@@ -39,13 +39,27 @@ lazy val core = crossProject
     commonSettings,
     name := "metarpheus-core",
     libraryDependencies ++= Seq(
-      "org.scalameta" %% "scalameta" % "1.8.0",
-      "org.scalameta" %% "contrib" % "1.8.0",
-      "org.scalatest" %% "scalatest" % "3.0.1" % Test
+      "org.scalameta" %%% "scalameta" % "1.8.0",
+      "org.scalameta" %%% "contrib" % "1.8.0",
+      "org.scalatest" %%% "scalatest" % "3.0.1" % Test
     )
   )
 lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
+
+lazy val jsFacade = project
+  .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin)
+  .settings(
+    commonSettings,
+    name := "metarpheus-js-facade",
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
+    libraryDependencies ++= Seq(
+      "io.circe" %%% "circe-core" % "0.8.0",
+      "io.circe" %%% "circe-parser" % "0.8.0",
+      "io.circe" %%% "circe-generic-extras" % "0.8.0"
+    )
+  )
+  .dependsOn(coreJS)
 
 lazy val cli = project
   .settings(

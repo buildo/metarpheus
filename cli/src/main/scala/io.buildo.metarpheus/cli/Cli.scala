@@ -22,15 +22,7 @@ object Cli {
   def main(argv: Array[String]): Unit = {
     val conf = new CommandLine(argv)
 
-    val files = (conf.targets.get.get: List[String]).map { target =>
-      val fileOrDir = new File(target)
-      if (!fileOrDir.exists) {
-        throw new Exception("The provided file or folder does not exist")
-      }
-      recursivelyListFiles(fileOrDir)
-    }.flatten.filter(_.getName.endsWith(".scala")).toList
-    
-    val sources = files.map(Source.fromFile(_).mkString)
+    val paths = conf.targets.get.get
 
     implicit val parseConfig: Configuration = Configuration.default.withDefaults
     val config = (for {
@@ -39,23 +31,23 @@ object Cli {
       parsed <- decode[core.Config](json).toOption
     } yield parsed).getOrElse(core.Config.default)
 
-    val wiro = conf.wiro.get.getOrElse(false)
+    val wiro = conf.wiro.get.getOrElse(config.wiro)
 
-    val api = core.Metarpheus.run(sources, config.copy(wiro = wiro))
+    val api = core.Metarpheus.run(paths, config.copy(wiro = wiro))
 
     val serializedAPI = repr.serializeAPI(api)
 
-    conf.outputFile.get.map { outputFilePath =>
-      val f = new File(outputFilePath)
-      val p = new java.io.PrintWriter(f)
-      try {
-        p.println(serializedAPI)
-      } finally {
-        p.close()
-      }
+    conf.outputFile.get match {
+      case None => println(serializedAPI)
+      case Some(outputFilePath) =>
+        val f = new File(outputFilePath)
+        val p = new java.io.PrintWriter(f)
+        try {
+          p.println(serializedAPI)
+        } finally {
+          p.close()
+        }
     }
-
-    println(serializedAPI)
   }
 
   private[this] def recursivelyListFiles(target: File): Array[File] = {
