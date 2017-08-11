@@ -26,7 +26,7 @@ object Metarpheus {
       parsed = parsed,
       authRouteTermNames = config.authRouteTermNames,
       wiro = config.wiro
-    )
+    ).stripUnusedModels(config.modelsForciblyInUse)
   }
 
 }
