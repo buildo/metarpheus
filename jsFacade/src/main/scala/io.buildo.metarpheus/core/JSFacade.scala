@@ -21,7 +21,8 @@ object JSFacade {
 
   @JSExportTopLevel("run")
   def run(paths: js.Array[String], jsConfig: js.UndefOr[JSConfig]) = {
-    implicit val circeConfiguration: Configuration = Configuration.default.withDefaults
+    implicit val circeConfiguration: Configuration =
+      Configuration.default.withDefaults.withDiscriminator("_type")
     val config = jsConfig
       .map { jsConfig =>
         val json = js.JSON.stringify(jsConfig)
@@ -33,7 +34,8 @@ object JSFacade {
       .getOrElse(Config.default)
 
     val result = Metarpheus.run(paths.toList, config)
-    js.JSON.parse(result.asJson.noSpaces)
+    val printer = Printer.noSpaces.copy(dropNullKeys = true)
+    js.JSON.parse(printer.pretty(result.asJson))
   }
 
 }
