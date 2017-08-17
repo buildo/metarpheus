@@ -172,7 +172,8 @@ class ControllerSuite extends FunSuite {
             desc = Some("create a camping"),
             name = List("campingController", "create")
           )
-        ).toString)
+        ).toString
+    )
 
   }
 }

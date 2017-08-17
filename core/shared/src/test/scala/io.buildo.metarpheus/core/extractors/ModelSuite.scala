@@ -31,11 +31,13 @@ class ModelSuite extends FunSuite {
               CaseClass.Member(
                 name = "location",
                 tpe = Type.Name("CampingLocation"),
-                desc = Some("camping location")),
+                desc = Some("camping location")
+              ),
               CaseClass.Member(
                 name = "rating",
                 tpe = Type.Name("CampingRating"),
-                desc = Some("camping rating"))
+                desc = Some("camping rating")
+              )
             ),
             desc = Some("Represents a camping site")
           ),
@@ -110,7 +112,8 @@ class ModelSuite extends FunSuite {
             ),
             desc = Some("Surface of the camping site")
           )
-        ))
+        )
+    )
   }
 
 }

@@ -74,7 +74,8 @@ package object extractors {
    */
   private[extractors] def findRelatedComment(
     source: scala.meta.Source,
-    t: scala.meta.Tree): Option[scala.meta.Token] =
+    t: scala.meta.Tree
+  ): Option[scala.meta.Token] =
     AssociatedComments(source.tokens).leading(t).headOption
 
   private[extractors] sealed trait Tag
@@ -86,7 +87,8 @@ package object extractors {
     * Extract route description and tags (such as @param) from route comment
     */
   private[extractors] def extractDescAndTagsFromComment(
-    token: Option[scala.meta.Token]): (Option[String], List[Tag]) =
+    token: Option[scala.meta.Token]
+  ): (Option[String], List[Tag]) =
     token
       .map { c =>
         val cleanLines = stripCommentMarkers(c.show[Syntax])

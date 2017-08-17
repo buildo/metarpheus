@@ -13,7 +13,8 @@ class CliSuite extends FunSuite {
 
   test("run main with wiro flag") {
     Cli.main(
-      s"--wiro --config cli/src/test/resources/fixtures/config.json $fixturesPath".split(" "))
+      s"--wiro --config cli/src/test/resources/fixtures/config.json $fixturesPath".split(" ")
+    )
   }
 
 }

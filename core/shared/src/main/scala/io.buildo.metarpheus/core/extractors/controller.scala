@@ -20,7 +20,8 @@ package object controller {
   private[this] def extractParams(
     m: Decl.Def,
     paramsDesc: List[ParamDesc],
-    inBody: Boolean): List[intermediate.RouteParam] = {
+    inBody: Boolean
+  ): List[intermediate.RouteParam] = {
     m.paramss.headOption
       .map { params =>
         params.map { p =>

@@ -94,7 +94,8 @@ class RouteSuite extends FunSuite {
                   Type.Name("Int"),
                   true,
                   Some("camping id")
-                ))
+                )
+              )
             ),
             params = List(),
             authenticated = true,
@@ -114,7 +115,8 @@ class RouteSuite extends FunSuite {
                   Type.Apply("Id", Seq(Type.Name("Camping"))),
                   true,
                   None
-                ))
+                )
+              )
             ),
             params = List(),
             authenticated = true,
@@ -184,7 +186,8 @@ class RouteSuite extends FunSuite {
             desc = Some("get multiple campings by params with case class"),
             name = List("campingController", "getByQuery")
           )
-        ).toString)
+        ).toString
+    )
 
   }
 }

@@ -76,14 +76,16 @@ package object model {
                     case _: Mod.Sealed => ()
                   }.isDefined &&
                     o.templ.stats
-                      .map(x =>
-                        x.forall {
-                          case c: Defn.Object if c.mods.collectFirst {
-                                case _: Mod.Case => ()
-                              }.isDefined =>
-                            true
-                          case _ => false
-                      })
+                      .map(
+                        x =>
+                          x.forall {
+                            case c: Defn.Object if c.mods.collectFirst {
+                                  case _: Mod.Case => ()
+                                }.isDefined =>
+                              true
+                            case _ => false
+                        }
+                      )
                       .getOrElse(false)
                 case _ => false
               }
@@ -101,8 +103,9 @@ package object model {
     * Extract the ADT-like enumeration intermediate representation from the output of
     * of extractCaseEnumDefns
     */
-  def extractCaseEnum(source: scala.meta.Source)(
-    caseEnumDefnInfo: CaseEnumDefnInfo): intermediate.CaseEnum = {
+  def extractCaseEnum(
+    source: scala.meta.Source
+  )(caseEnumDefnInfo: CaseEnumDefnInfo): intermediate.CaseEnum = {
 
     def membersFromTempl(t: Template): List[intermediate.CaseEnum.Member] = {
       t.stats.get.collect {

@@ -46,7 +46,8 @@ case class Route(
   body: Option[Route.Body],
   ctrl: List[String],
   desc: Option[String],
-  name: List[String])
+  name: List[String]
+)
 
 object Route {
   case class Body(tpe: Type, desc: Option[String])
@@ -94,7 +95,8 @@ case class API(models: List[Model], routes: List[Route]) {
     val modelsIntersection = recursivelyUsedModels.intersect(modelsForciblyInUse)
     if (!modelsIntersection.isEmpty)
       throw new Exception(
-        s"The following models are already used by the routes, no need to force inclusion: $modelsIntersection")
+        s"The following models are already used by the routes, no need to force inclusion: $modelsIntersection"
+      )
 
     val inUseNames = recursivelyUsedModels ++ modelsForciblyInUse
 

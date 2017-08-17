@@ -37,7 +37,8 @@ package object route {
     pathPrefix: List[String],
     authenticated: Boolean,
     routeTpe: Term.ApplyInfix,
-    routeTerm: Term)
+    routeTerm: Term
+  )
 
   /**
     * Find a router definition in a source file and extract a list of routes to
@@ -62,7 +63,8 @@ package object route {
     */
   def extractRouteTerms(
     source: scala.meta.Source,
-    authRouteTermNames: List[String]): List[RouteTermInfo] = {
+    authRouteTermNames: List[String]
+  ): List[RouteTermInfo] = {
 
     val routesTerms: List[(Term, Boolean)] = // (term, authenticated)
       source.collect {
@@ -102,7 +104,8 @@ package object route {
       }
 
     def recurse(
-      prefix: List[String])(routesTerm: Term, authenticated: Boolean): List[RouteTermInfo] = {
+      prefix: List[String]
+    )(routesTerm: Term, authenticated: Boolean): List[RouteTermInfo] = {
 
       val routeTerms = getAllInfix(routesTerm, "~")
 
@@ -160,7 +163,8 @@ package object route {
     desc: Option[String],
     paramDescs: Map[String, Option[String]],
     pathParamNamesAndDescs: List[(String, Option[String])],
-    routeName: Option[List[String]])
+    routeName: Option[List[String]]
+  )
 
   /**
     * Extract relevant information from the route comment.
@@ -202,7 +206,8 @@ package object route {
     def extractParamTerm(
       applyType: Term.ApplyType,
       optional: Boolean,
-      aliasDesc: Option[String]): intermediate.RouteParam = {
+      aliasDesc: Option[String]
+    ): intermediate.RouteParam = {
 
       val Term.ApplyType(
         Term.Select(Lit(paramSym: scala.Symbol), Term.Name("as")),
@@ -214,7 +219,8 @@ package object route {
         name = Some(name),
         tpe = tpeToIntermediate(paramTpe),
         required = !optional,
-        desc = desc)
+        desc = desc
+      )
     }
 
     def extractSimpleParamTerm(name: String, aliasDesc: Option[String]): intermediate.RouteParam =
@@ -255,7 +261,8 @@ package object route {
               }
               Param(
                 intermediate
-                  .RouteParam(name = Some(name), tpe = paramTpe, required = required, desc = desc))
+                  .RouteParam(name = Some(name), tpe = paramTpe, required = required, desc = desc)
+              )
           }
         case Term.Name("pathEnd" | "pathEndCommit") =>
           List(Route(Nil))
@@ -267,12 +274,16 @@ package object route {
                   name = None,
                   tpe = defaultRouteMatchers(segmentMatcher),
                   required = true,
-                  desc = None))
+                  desc = None
+                )
+              )
             case Lit(stringSegm: String) =>
               intermediate.RouteSegment.String(stringSegm)
             case t @ Term.ApplyType(Term.Name(segmentMatcher), _) =>
-              intermediate.RouteSegment.Param(intermediate
-                .RouteParam(name = None, tpe = tpeToIntermediate(t), required = true, desc = None))
+              intermediate.RouteSegment.Param(
+                intermediate
+                  .RouteParam(name = None, tpe = tpeToIntermediate(t), required = true, desc = None)
+              )
           }
           val result = pathParamNamesAndDescs match {
             case Nil => route
@@ -282,8 +293,9 @@ package object route {
                   case (((name, desc) :: pps, acc), intermediate.RouteSegment.Param(routeParam)) =>
                     (
                       pps,
-                      acc :+ intermediate.RouteSegment.Param(
-                        routeParam.copy(name = Some(name), desc = desc)))
+                      acc :+ intermediate.RouteSegment
+                        .Param(routeParam.copy(name = Some(name), desc = desc))
+                    )
                   case ((pps, acc), segment) => (pps, acc :+ segment)
                 })
                 ._2
@@ -291,7 +303,8 @@ package object route {
           List(Route(result))
         case Term.Apply(
             Term.Name("entity" | "flatEntity"),
-            List(Term.ApplyType(Term.Name("as" | "flatAs"), List(tpe: Type)))) =>
+            List(Term.ApplyType(Term.Name("as" | "flatAs"), List(tpe: Type)))
+            ) =>
           List(Body(intermediate.Route.Body(tpeToIntermediate(tpe), None)))
         case Term.Name(name) if aliases.contains(name) =>
           extract(aliases(name).term, aliasDesc = aliases(name).desc)
@@ -340,7 +353,8 @@ package object route {
   }
 
   def extractAllRoutes(models: List[intermediate.CaseClass], authRouteTermNames: List[String])(
-    f: scala.meta.Source): List[intermediate.Route] = {
+    f: scala.meta.Source
+  ): List[intermediate.Route] = {
     val aliases = extractAliases(f)
     extractRouteTerms(f, authRouteTermNames).map { routeTerm =>
       val routeCommentInfo = extractRouteCommentInfo(routeTerm.routeTpe)

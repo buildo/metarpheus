@@ -21,7 +21,8 @@ trait CampingController {
   def getByCoolnessAndSize(
     coolness: String,
     size: Option[Int],
-    nickname: String): Future[Either[String, List[Camping]]]
+    nickname: String
+  ): Future[Either[String, List[Camping]]]
 
   /**
     * get campings matching the requested size and distance
@@ -62,14 +63,15 @@ trait CampingController {
 
 class CampingControllerImpl(
   implicit
-  executionContext: ExecutionContext)
-    extends CampingController {
+  executionContext: ExecutionContext
+) extends CampingController {
 
   @query
   def getByCoolnessAndSize(
     coolness: String,
     size: Int,
-    nickname: String): Future[Either[String, List[Camping]]] = ???
+    nickname: String
+  ): Future[Either[String, List[Camping]]] = ???
 
   @query
   def getBySizeAndDistance(size: Int, distance: Int): Future[Either[String, List[Camping]]] = ???

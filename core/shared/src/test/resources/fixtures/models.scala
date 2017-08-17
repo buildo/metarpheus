@@ -14,7 +14,8 @@ case class Camping(
   name: String,
   size: Int,
   location: CampingLocation,
-  rating: CampingRating)
+  rating: CampingRating
+)
 
 /**
   *  Represents a swan

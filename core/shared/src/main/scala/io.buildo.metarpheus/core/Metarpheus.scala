@@ -22,11 +22,13 @@ object Metarpheus {
       .flatMap(path => recursivelyListFiles(AbsolutePath(path)))
       .filter(_.toString.endsWith(".scala"))
     val parsed = files.map(File(_).parse[Source].get)
-    extractors.extractFullAPI(
-      parsed = parsed,
-      authRouteTermNames = config.authRouteTermNames,
-      wiro = config.wiro
-    ).stripUnusedModels(config.modelsForciblyInUse)
+    extractors
+      .extractFullAPI(
+        parsed = parsed,
+        authRouteTermNames = config.authRouteTermNames,
+        wiro = config.wiro
+      )
+      .stripUnusedModels(config.modelsForciblyInUse)
   }
 
 }
