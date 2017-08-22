@@ -22,6 +22,18 @@ object Metarpheus {
       .flatMap(path => recursivelyListFiles(AbsolutePath(path)))
       .filter(_.toString.endsWith(".scala"))
     val parsed = files.map(File(_).parse[Source].get)
+
+    if(config.verbose) {
+      val filesString = files.mkString(" \n\t ")
+      val parsedString = parsed.mkString(" \n\t ")
+      println(
+        s"""files : $filesString
+          | parsed: $parsedString
+        """.stripMargin)
+    }
+
+
+
     extractors
       .extractFullAPI(
         parsed = parsed,

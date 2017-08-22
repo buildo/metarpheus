@@ -4,7 +4,8 @@ package core
 case class Config(
   authRouteTermNames: List[String] = Nil,
   modelsForciblyInUse: Set[String] = Set.empty,
-  wiro: Boolean = false
+  wiro: Boolean = false   ,
+  verbose: Boolean = false
 )
 
 object Config {
