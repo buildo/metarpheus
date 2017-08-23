@@ -10,7 +10,7 @@ package object extractors {
     parsed: List[scala.meta.Source],
     authRouteTermNames: List[String],
     wiro: Boolean,
-    verbose: Boolean
+    verbose: Boolean = false
   ): intermediate.API = {
 
     val models: List[intermediate.Model] =
