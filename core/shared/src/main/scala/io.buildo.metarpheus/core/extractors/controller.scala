@@ -2,7 +2,7 @@ package io.buildo.metarpheus
 package core
 package extractors
 
-import scala.meta._
+import scala.meta.{Tree, _}
 
 package object controller {
 
@@ -61,16 +61,23 @@ package object controller {
         """.stripMargin)
       }
 
-  def extractAllRoutes(source: Source): List[intermediate.Route] =
+  def extractAllRoutes(source: Source): List[intermediate.Route] ={
+
     source.collect { case t: Defn.Trait => t }.flatMap(t => extractRoute(source, t))
+  }
+
 
   def extractRoute(source: Source, t: Defn.Trait): List[intermediate.Route] = {
+
+
     val methods = t.collect {
       case m: Decl.Def if m.mods.collect {
             case Mod.Annot(Ctor.Ref.Name("query" | "command")) => ()
           }.nonEmpty =>
         m
     }
+
+
 
     val (controllerName, name) = t.mods
       .collectFirst {

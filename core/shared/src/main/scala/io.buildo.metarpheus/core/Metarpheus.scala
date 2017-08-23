@@ -25,10 +25,12 @@ object Metarpheus {
 
     if(config.verbose) {
       val filesString = files.mkString(" \n\t ")
-      val parsedString = parsed.mkString(" \n\t ")
       println(
-        s"""files : $filesString
-          | parsed: $parsedString
+        s"""paths : $paths
+           |files : $filesString
+          |
+          |---------------------------------------
+          |
         """.stripMargin)
     }
 
@@ -38,7 +40,8 @@ object Metarpheus {
       .extractFullAPI(
         parsed = parsed,
         authRouteTermNames = config.authRouteTermNames,
-        wiro = config.wiro
+        wiro = config.wiro,
+        verbose = config.verbose
       )
       .stripUnusedModels(config.modelsForciblyInUse)
   }

@@ -9,7 +9,8 @@ package object extractors {
   def extractFullAPI(
     parsed: List[scala.meta.Source],
     authRouteTermNames: List[String],
-    wiro: Boolean
+    wiro: Boolean,
+    verbose:Boolean
   ): intermediate.API = {
 
     val models: List[intermediate.Model] =
@@ -24,6 +25,13 @@ package object extractors {
       } else {
         parsed.flatMap(extractors.route.extractAllRoutes(caseClasses, authRouteTermNames))
       }
+
+    if(verbose){
+      println(s"routes: $routes")
+      println(s"models: $routes")
+
+    }
+
 
     intermediate.API(models, routes)
   }
