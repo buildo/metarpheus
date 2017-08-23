@@ -53,22 +53,20 @@ package object controller {
       .headOption
       .getOrElse {
         throw new Exception(s"""
-          |This method misses an explicit return type
-          |
+             |This method misses an explicit return type
+             |
           |  ${m.syntax}
-          |
+             |
           |It should be in the form of Future[Either[A, B]].
         """.stripMargin)
       }
 
-  def extractAllRoutes(source: Source): List[intermediate.Route] ={
+  def extractAllRoutes(source: Source): List[intermediate.Route] = {
 
     source.collect { case t: Defn.Trait => t }.flatMap(t => extractRoute(source, t))
   }
 
-
   def extractRoute(source: Source, t: Defn.Trait): List[intermediate.Route] = {
-
 
     val methods = t.collect {
       case m: Decl.Def if m.mods.collect {
@@ -76,8 +74,6 @@ package object controller {
           }.nonEmpty =>
         m
     }
-
-
 
     val (controllerName, name) = t.mods
       .collectFirst {

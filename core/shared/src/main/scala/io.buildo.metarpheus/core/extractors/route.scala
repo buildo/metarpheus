@@ -52,9 +52,9 @@ package object route {
     *
     * @publishRoute
     * val route = {
-    *   (<routeTpe>) (<routeTerm>) ~
-    *   (<routeTpe>) (<routeTerm>) ~
-    *   ...
+    * (<routeTpe>) (<routeTerm>) ~
+    * (<routeTpe>) (<routeTerm>) ~
+    * ...
     * }
     *
     * prefix will contain a list of all "pathPrefix"es encountered
@@ -149,7 +149,9 @@ package object route {
   }
 
   private case class TooFewMatches() extends Exception
+
   private case class TooManyMatches() extends Exception
+
   private implicit class ListPimp[A](list: List[A]) {
     def getOne[B](pf: PartialFunction[A, B]) =
       list.collect(pf) match {
@@ -314,6 +316,7 @@ package object route {
           getAllInfix(termInfix, "&").map(extract(_, aliasDesc)).flatten
         case otherwise => println(otherwise.show[Structure]); ???
       }
+
       extract(term, aliasDesc = None)
     }
 

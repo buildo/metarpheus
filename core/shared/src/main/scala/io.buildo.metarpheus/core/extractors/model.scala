@@ -47,7 +47,9 @@ package object model {
   }
 
   sealed trait CaseEnumDefns
+
   case class SugaredCaseEnumDefns(defn: Defn.Trait) extends CaseEnumDefns
+
   case class VanillaCaseEnumDefns(trait_defn: Defn.Trait, obj_defn: Defn.Object)
       extends CaseEnumDefns
 

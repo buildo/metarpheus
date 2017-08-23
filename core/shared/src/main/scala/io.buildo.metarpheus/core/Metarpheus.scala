@@ -23,18 +23,15 @@ object Metarpheus {
       .filter(_.toString.endsWith(".scala"))
     val parsed = files.map(File(_).parse[Source].get)
 
-    if(config.verbose) {
+    if (config.verbose) {
       val filesString = files.mkString(" \n\t ")
-      println(
-        s"""paths : $paths
+      println(s"""paths : $paths
            |files : $filesString
-          |
-          |---------------------------------------
-          |
+           |
+           |---------------------------------------
+           |
         """.stripMargin)
     }
-
-
 
     extractors
       .extractFullAPI(

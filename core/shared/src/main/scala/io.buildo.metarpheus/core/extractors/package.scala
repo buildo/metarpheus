@@ -10,7 +10,7 @@ package object extractors {
     parsed: List[scala.meta.Source],
     authRouteTermNames: List[String],
     wiro: Boolean,
-    verbose:Boolean
+    verbose: Boolean
   ): intermediate.API = {
 
     val models: List[intermediate.Model] =
@@ -26,12 +26,11 @@ package object extractors {
         parsed.flatMap(extractors.route.extractAllRoutes(caseClasses, authRouteTermNames))
       }
 
-    if(verbose){
+    if (verbose) {
       println(s"routes: $routes")
       println(s"models: $routes")
 
     }
-
 
     intermediate.API(models, routes)
   }
@@ -87,8 +86,11 @@ package object extractors {
     AssociatedComments(source.tokens).leading(t).headOption
 
   private[extractors] sealed trait Tag
+
   private[extractors] case class ParamDesc(name: String, desc: Option[String]) extends Tag
+
   private[extractors] case class PathParamDesc(name: String, desc: Option[String]) extends Tag
+
   private[extractors] case class RouteName(name: List[String]) extends Tag
 
   /**

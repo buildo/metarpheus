@@ -20,8 +20,6 @@ class CommandLine(args: Array[String]) extends ScallopConf(args) {
 
 object Cli {
 
-
-
   def main(argv: Array[String]): Unit = {
     val conf = new CommandLine(argv)
 
@@ -33,7 +31,6 @@ object Cli {
       json = Source.fromFile(fileName).mkString
       parsed <- decode[core.Config](json).toOption
     } yield parsed).getOrElse(core.Config.default)
-
 
     val wiro = conf.wiro.get.getOrElse(config.wiro)
 
@@ -55,9 +52,8 @@ object Cli {
         }
     }
 
-    for (v <- conf.verbose.get){
-      println(
-        s"""config: $config
+    for (v <- conf.verbose.get) {
+      println(s"""config: $config
            |api: $api
            |serializedAPI: $serializedAPI
          """.stripMargin)
