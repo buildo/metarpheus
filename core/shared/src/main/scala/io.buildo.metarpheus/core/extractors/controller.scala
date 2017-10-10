@@ -12,10 +12,16 @@ package object controller {
       case Mod.Annot(Ctor.Ref.Name("command")) => "post"
     }.get
 
+  private[this] def isAuthParam(param: scala.meta.Term.Param): Boolean =
+    param.decltpe match {
+      case Some(Type.Name("Auth")) => true
+      case _ => false
+    }
+
   private[this] def extractAuthenticated(m: Decl.Def): Boolean =
-    m.mods.collectFirst {
-      case Mod.Annot(Ctor.Ref.Name("token")) => ()
-    }.nonEmpty
+    m.paramss.headOption
+      .map(_.exists(isAuthParam))
+      .getOrElse(false)
 
   private[this] def extractParams(
     m: Decl.Def,
@@ -24,7 +30,7 @@ package object controller {
   ): List[intermediate.RouteParam] = {
     m.paramss.headOption
       .map { params =>
-        params.map { p =>
+        params.filterNot(isAuthParam).map { p =>
           val (tpe, required) = p.decltpe.collectFirst {
             case Type.Apply(Type.Name("Option"), Seq(t)) => (tpeToIntermediate(t), false)
             case t: Type => (tpeToIntermediate(t), true)
