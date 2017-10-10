@@ -13,7 +13,7 @@ package object controller {
       case Mod.Annot(Ctor.Ref.Name("command")) => "post"
     }.get
 
-  private val authType = Type.Name("Auth")
+  private[this] val authType = Type.Name("Auth")
 
   private[this] def isAuthParam(param: scala.meta.Term.Param): Boolean =
     param.decltpe.exists(_.isEqual(authType))
