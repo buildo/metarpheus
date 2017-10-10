@@ -3,6 +3,7 @@ package core
 package extractors
 
 import scala.meta._
+import scala.meta.contrib._
 
 package object controller {
 
@@ -12,10 +13,13 @@ package object controller {
       case Mod.Annot(Ctor.Ref.Name("command")) => "post"
     }.get
 
+  private[this] val authType = Type.Name("Auth")
+
+  private[this] def isAuthParam(param: scala.meta.Term.Param): Boolean =
+    param.decltpe.exists(_.isEqual(authType))
+
   private[this] def extractAuthenticated(m: Decl.Def): Boolean =
-    m.mods.collectFirst {
-      case Mod.Annot(Ctor.Ref.Name("token")) => ()
-    }.nonEmpty
+    m.paramss.headOption.exists(_.exists(isAuthParam))
 
   private[this] def extractParams(
     m: Decl.Def,
@@ -24,7 +28,7 @@ package object controller {
   ): List[intermediate.RouteParam] = {
     m.paramss.headOption
       .map { params =>
-        params.map { p =>
+        params.filterNot(isAuthParam).map { p =>
           val (tpe, required) = p.decltpe.collectFirst {
             case Type.Apply(Type.Name("Option"), Seq(t)) => (tpeToIntermediate(t), false)
             case t: Type => (tpeToIntermediate(t), true)

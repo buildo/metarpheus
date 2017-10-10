@@ -36,16 +36,15 @@ trait CampingController {
     * get a camping by id
     * @param id camping id
     */
-  @token
+
   @query
-  def getById(id: Int): Future[Either[String, Camping]]
+  def getById(id: Int, token: Auth): Future[Either[String, Camping]]
 
   /**
     * get a camping by typed id
     */
-  @token
   @query
-  def getByTypedId(id: `Id`[Camping]): Future[Either[String, Camping]]
+  def getByTypedId(token: Auth, id: `Id`[Camping]): Future[Either[String, Camping]]
 
   /**
     * get campings based on whether they're close to a beach
