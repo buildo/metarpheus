@@ -55,6 +55,7 @@ lazy val jsFacade = project
     commonSettings,
     name := "metarpheus-js-facade",
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
+    scalacOptions += "-P:scalajs:sjsDefinedByDefault",
     libraryDependencies ++= Seq(
       "io.circe" %%% "circe-core" % "0.8.0",
       "io.circe" %%% "circe-parser" % "0.8.0",

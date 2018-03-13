@@ -12,7 +12,6 @@ import io.circe.generic.extras.auto._
 
 object JSFacade {
 
-  @ScalaJSDefined
   trait JSConfig extends js.Object {
     val authRouteTermNames: js.UndefOr[js.Array[String]]
     val modelsForciblyInUse: js.UndefOr[js.Array[String]]
