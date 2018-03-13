@@ -30,6 +30,7 @@ package object model {
     */
   def extractCaseClass(caseClassDefnInfo: CaseClassDefnInfo): intermediate.CaseClass = {
     val CaseClassDefnInfo(defn, comment) = caseClassDefnInfo
+    val isValueClass = defn.templ.parents.exists(_.syntax == "AnyVal")
     val className = defn.name.value
     val Ctor.Primary(_, Ctor.Ref.Name("this"), List(plist)) = defn.ctor
     val (classDesc, tags) = extractDescAndTagsFromComment(comment)
@@ -43,7 +44,12 @@ package object model {
           desc = paramDescs.find(_.name == name).flatMap(_.desc)
         )
     }.toList
-    intermediate.CaseClass(name = className, members = members, desc = classDesc)
+    intermediate.CaseClass(
+      name = className,
+      members = members,
+      desc = classDesc,
+      isValueClass = isValueClass
+    )
   }
 
   sealed trait CaseEnumDefns

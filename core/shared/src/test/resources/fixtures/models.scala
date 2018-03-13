@@ -2,6 +2,8 @@ package io.buildo.baseexample
 
 package models
 
+case class CampingName(s: String) extends AnyVal
+
 /**
   * Represents a camping site
   * @param name
@@ -11,7 +13,7 @@ package models
   */
 case class Camping(
   id: java.util.UUID,
-  name: String,
+  name: CampingName,
   size: Int,
   location: CampingLocation,
   rating: CampingRating

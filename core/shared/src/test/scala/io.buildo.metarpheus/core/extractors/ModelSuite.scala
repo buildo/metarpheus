@@ -22,10 +22,18 @@ class ModelSuite extends FunSuite {
       result ===
         List(
           CaseClass(
+            name = "CampingName",
+            members = List(
+              CaseClass.Member(name = "s", tpe = Type.Name("String"), desc = None)
+            ),
+            desc = None,
+            isValueClass = true
+          ),
+          CaseClass(
             name = "Camping",
             members = List(
               CaseClass.Member(name = "id", tpe = Type.Name("UUID"), desc = None),
-              CaseClass.Member(name = "name", tpe = Type.Name("String"), desc = None),
+              CaseClass.Member(name = "name", tpe = Type.Name("CampingName"), desc = None),
               CaseClass
                 .Member(name = "size", tpe = Type.Name("Int"), desc = Some("number of tents")),
               CaseClass.Member(

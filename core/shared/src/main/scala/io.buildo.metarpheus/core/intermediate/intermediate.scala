@@ -12,8 +12,12 @@ object Type {
 sealed trait Model {
   val name: String
 }
-case class CaseClass(name: String, members: List[CaseClass.Member], desc: Option[String])
-    extends Model
+case class CaseClass(
+  name: String,
+  members: List[CaseClass.Member],
+  desc: Option[String],
+  isValueClass: Boolean = false
+) extends Model
 object CaseClass {
   case class Member(name: String, tpe: Type, desc: Option[String])
 }
@@ -82,7 +86,7 @@ case class API(models: List[Model], routes: List[Route]) {
         models
           .filter(m => inUseConcreteTypeNames(inUse).contains(m.name))
           .collect {
-            case CaseClass(_, members, _) => members.map(_.tpe)
+            case CaseClass(_, members, _, _) => members.map(_.tpe)
           }
           .flatMap(o => o)
       if (newInUse == inUse) inUseConcreteTypeNames(inUse)
