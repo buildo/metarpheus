@@ -3,6 +3,7 @@ package core
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation._
+import scala.util.control.NonFatal
 
 import io.circe._
 import io.circe.syntax._
@@ -32,9 +33,13 @@ object JSFacade {
       }
       .getOrElse(Config.default)
 
-    val result = Metarpheus.run(paths.toList, config)
-    val printer = Printer.noSpaces.copy(dropNullKeys = true)
-    js.JSON.parse(printer.pretty(result.asJson))
+    try {
+      val result = Metarpheus.run(paths.toList, config)
+      val printer = Printer.noSpaces.copy(dropNullKeys = true)
+      js.JSON.parse(printer.pretty(result.asJson))
+    } catch {
+      case NonFatal(e) => throw js.JavaScriptException(e.getMessage)
+    }
   }
 
 }
