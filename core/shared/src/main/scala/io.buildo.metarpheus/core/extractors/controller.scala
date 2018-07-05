@@ -14,9 +14,13 @@ package object controller {
     }.get
 
   private[this] val authType = Type.Name("Auth")
+  private[this] val operationParametersType = Type.Name("OperationParameters")
 
   private[this] def isAuthParam(param: scala.meta.Term.Param): Boolean =
     param.decltpe.exists(_.isEqual(authType))
+
+  private[this] def isOperationParameters(param: scala.meta.Term.Param): Boolean =
+    param.decltpe.exists(_.isEqual(operationParametersType))
 
   private[this] def extractAuthenticated(m: Decl.Def): Boolean =
     m.paramss.headOption.exists(_.exists(isAuthParam))
@@ -28,21 +32,24 @@ package object controller {
   ): List[intermediate.RouteParam] = {
     m.paramss.headOption
       .map { params =>
-        params.filterNot(isAuthParam).map { p =>
-          val (tpe, required) = p.decltpe.collectFirst {
-            case Type.Apply(Type.Name("Option"), Seq(t)) => (tpeToIntermediate(t), false)
-            case t: Type => (tpeToIntermediate(t), true)
-          }.head
+        params
+          .filterNot(isAuthParam)
+          .filterNot(isOperationParameters)
+          .map { p =>
+            val (tpe, required) = p.decltpe.collectFirst {
+              case Type.Apply(Type.Name("Option"), Seq(t)) => (tpeToIntermediate(t), false)
+              case t: Type => (tpeToIntermediate(t), true)
+            }.head
 
-          val name = p.name.syntax
-          intermediate.RouteParam(
-            name = Option(p.name.syntax),
-            tpe = tpe,
-            required = required,
-            desc = paramsDesc.find(_.name == name).flatMap(_.desc),
-            inBody = inBody
-          )
-        }
+            val name = p.name.syntax
+            intermediate.RouteParam(
+              name = Option(p.name.syntax),
+              tpe = tpe,
+              required = required,
+              desc = paramsDesc.find(_.name == name).flatMap(_.desc),
+              inBody = inBody
+            )
+          }
       }
       .getOrElse(Nil)
       .toList

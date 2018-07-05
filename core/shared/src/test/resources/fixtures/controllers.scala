@@ -4,6 +4,7 @@ package controllers
 
 import models._
 
+import wiro.OperationParameters
 import wiro.annotation._
 
 import scala.concurrent.{Future, ExecutionContext}
@@ -57,7 +58,7 @@ trait CampingController {
     * create a camping
     */
   @command
-  def create(camping: Camping): Future[Either[String, Camping]]
+  def create(camping: Camping, parameters: OperationParameters): Future[Either[String, Camping]]
 }
 
 class CampingControllerImpl(

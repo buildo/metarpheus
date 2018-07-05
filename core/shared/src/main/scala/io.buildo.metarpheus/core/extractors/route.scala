@@ -240,7 +240,7 @@ package object route {
       def extract(t: Term, aliasDesc: Option[String]): List[DirOut] = t match {
         case Term.Name(method) if List("get", "post", "delete", "put").contains(method) =>
           List(Method(method))
-        case Term.Apply(Term.Name("parameters" | "parameter"), paramTerms: List[Term]) =>
+        case Term.Apply(Term.Name("parameters" | "parameter"), paramTerms: List[_]) =>
           paramTerms.map {
             case Term.Select(applyType: Term.ApplyType, Term.Name("?")) =>
               Param(extractParamTerm(applyType, true, aliasDesc))
