@@ -11,12 +11,13 @@ case class CampingName(s: String) extends AnyVal
   * @param location camping location
   * @param rating camping rating
   */
-case class Camping(
+case class Camping[A](
   id: java.util.UUID,
   name: CampingName,
   size: Int,
   location: CampingLocation,
-  rating: CampingRating
+  rating: CampingRating,
+  a: A
 )
 
 /**

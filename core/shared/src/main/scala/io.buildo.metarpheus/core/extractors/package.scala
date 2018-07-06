@@ -55,6 +55,12 @@ package object extractors {
       intermediate.Type.Apply(name.value, t.targs.map(tpeToIntermediate))
   }
 
+  private[extractors] def typeParamToIntermediate(t: Type.Param): intermediate.Type =
+    t.tparams match {
+      case Nil => intermediate.Type.Name(t.name.value)
+      case tparams => intermediate.Type.Apply(t.name.value, tparams.map(typeParamToIntermediate))
+    }
+
   private[extractors] def stripCommentMarkers(s: String) =
     s.stripPrefix("/")
       .dropWhile(_ == '*')

@@ -44,8 +44,10 @@ package object model {
           desc = paramDescs.find(_.name == name).flatMap(_.desc)
         )
     }.toList
+    val typeParams = defn.tparams.map(typeParamToIntermediate).toList
     intermediate.CaseClass(
       name = className,
+      typeParams = typeParams,
       members = members,
       desc = classDesc,
       isValueClass = isValueClass

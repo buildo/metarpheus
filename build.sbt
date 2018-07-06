@@ -41,7 +41,8 @@ lazy val core = crossProject
     libraryDependencies ++= Seq(
       "org.scalameta" %%% "scalameta" % "1.8.0",
       "org.scalameta" %%% "contrib" % "1.8.0",
-      "org.scalatest" %%% "scalatest" % "3.0.1" % Test
+      "org.scalatest" %%% "scalatest" % "3.0.1" % Test,
+      "ai.x" %% "diff" % "2.0" % Test
     )
   )
 lazy val coreJVM = core.jvm

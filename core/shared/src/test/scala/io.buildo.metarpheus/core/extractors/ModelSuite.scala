@@ -3,6 +3,8 @@ package core
 package test
 
 import org.scalatest._
+import ai.x.diff.DiffShow
+import ai.x.diff.conversions._
 
 import extractors._
 
@@ -18,8 +20,7 @@ class ModelSuite extends FunSuite {
 
     import intermediate._
 
-    assert(
-      result ===
+    val expected =
         List(
           CaseClass(
             name = "CampingName",
@@ -27,7 +28,7 @@ class ModelSuite extends FunSuite {
               CaseClass.Member(name = "s", tpe = Type.Name("String"), desc = None)
             ),
             desc = None,
-            isValueClass = true
+            isValueClass = true,
           ),
           CaseClass(
             name = "Camping",
@@ -45,9 +46,17 @@ class ModelSuite extends FunSuite {
                 name = "rating",
                 tpe = Type.Name("CampingRating"),
                 desc = Some("camping rating")
+              ),
+              CaseClass.Member(
+                name = "a",
+                tpe = Type.Name("A"),
+                desc = None
               )
             ),
-            desc = Some("Represents a camping site")
+            desc = Some("Represents a camping site"),
+            typeParams = List(
+              Type.Name("A")
+            )
           ),
           CaseClass(
             name = "Swan",
@@ -121,7 +130,8 @@ class ModelSuite extends FunSuite {
             desc = Some("Surface of the camping site")
           )
         )
-    )
+    val comparison = DiffShow.diff[List[Model]](expected, result)
+    assert(comparison.isIdentical, comparison.string)
   }
 
 }
