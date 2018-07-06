@@ -10,9 +10,7 @@ where:
 
 - `paths` is a list of **absolute** paths to analyze (they can be files or directories)
 - `config` [optional] is a configuration with the following (optional) keys:
-  - `authRouteTermNames`: a list of spray directives that represent authenticated routes. For instance `withRole`.
   - `modelsForciblyInUse`: a list of models that are included even if unused by the exposed API.
-  - `wiro`: whether the API to parse uses [Wiro](https://github.com/buildo/wiro) or not. (default: `false`).
 
 and `API` is an object composed by two fields:
 
@@ -29,7 +27,7 @@ const paths = [
 ];
 
 const config = {
-  wiro: true
+  modelsForciblyInUse: ['Swan']
 };
 
 const { models, routes } = run(paths, config);

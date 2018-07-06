@@ -12,7 +12,6 @@ import io.circe.generic.extras.auto._
 class CommandLine(args: Array[String]) extends ScallopConf(args) {
   val configPath = opt[String]("config", descr = "config file path", required = false)
   val outputFile = opt[String]("output", descr = "output file path", required = false)
-  val wiro = opt[Boolean]("wiro", descr = "parse wiro-style", required = false)
   val targets = trailArg[List[String]](required = true)
   verify()
 }
@@ -31,9 +30,7 @@ object Cli {
       parsed <- decode[core.Config](json).toOption
     } yield parsed).getOrElse(core.Config.default)
 
-    val wiro = conf.wiro.get.getOrElse(config.wiro)
-
-    val api = core.Metarpheus.run(paths, config.copy(wiro = wiro))
+    val api = core.Metarpheus.run(paths, config)
 
     val serializedAPI = repr.serializeAPI(api)
 

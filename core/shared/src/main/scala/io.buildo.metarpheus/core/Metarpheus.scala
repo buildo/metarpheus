@@ -23,11 +23,7 @@ object Metarpheus {
       .filter(_.toString.endsWith(".scala"))
     val parsed = files.map(File(_).parse[Source].get)
     extractors
-      .extractFullAPI(
-        parsed = parsed,
-        authRouteTermNames = config.authRouteTermNames,
-        wiro = config.wiro
-      )
+      .extractFullAPI(parsed = parsed)
       .stripUnusedModels(config.modelsForciblyInUse)
   }
 

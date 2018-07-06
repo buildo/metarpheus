@@ -12,7 +12,6 @@ class ApiSuite extends FunSuite {
     import scala.meta.dialects.Scala211
     List(
       Fixtures.models.parse[Source].get,
-      Fixtures.routes.parse[Source].get,
       Fixtures.controllers.parse[Source].get
     )
   }
@@ -20,20 +19,7 @@ class ApiSuite extends FunSuite {
   test("extract used models") {
     import intermediate._
 
-    val api = extractFullAPI(parsed, Common.authRouteTermNames, wiro = false)
-      .stripUnusedModels(Common.modelsForciblyInUse)
-
-    assert(api.models.collectFirst {
-      case CaseEnum("CampingLocation", _, _) => ()
-    }.isDefined)
-
-  }
-
-  test("extract wiro style") {
-    import intermediate._
-
-    val api = extractFullAPI(parsed, Common.authRouteTermNames, wiro = true)
-      .stripUnusedModels(Common.modelsForciblyInUse)
+    val api = extractFullAPI(parsed).stripUnusedModels(Common.modelsForciblyInUse)
 
     assert(api.routes.collectFirst {
       // format: off

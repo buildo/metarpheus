@@ -7,9 +7,7 @@ import scala.meta.contrib.AssociatedComments
 package object extractors {
 
   def extractFullAPI(
-    parsed: List[scala.meta.Source],
-    authRouteTermNames: List[String],
-    wiro: Boolean
+    parsed: List[scala.meta.Source]
   ): intermediate.API = {
 
     val models: List[intermediate.Model] =
@@ -19,11 +17,7 @@ package object extractors {
       models.collect { case x: intermediate.CaseClass => x }
 
     val routes: List[intermediate.Route] =
-      if (wiro) {
-        parsed.flatMap(extractors.controller.extractAllRoutes)
-      } else {
-        parsed.flatMap(extractors.route.extractAllRoutes(caseClasses, authRouteTermNames))
-      }
+      parsed.flatMap(extractors.controller.extractAllRoutes)
 
     intermediate.API(models, routes)
   }

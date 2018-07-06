@@ -6,7 +6,6 @@ import scala.io.Source
 
 object Fixtures {
   val models = Source.fromFile("core/shared/src/test/resources/fixtures/models.scala").mkString
-  val routes = Source.fromFile("core/shared/src/test/resources/fixtures/routes.scala").mkString
   val controllers =
     Source.fromFile("core/shared/src/test/resources/fixtures/controllers.scala").mkString
 }
