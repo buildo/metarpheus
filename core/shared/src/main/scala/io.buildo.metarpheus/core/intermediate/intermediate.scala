@@ -74,7 +74,7 @@ case class API(models: List[Model], routes: List[Route]) {
     def inUseConcreteTypeNames(models: Set[Type]): Set[String] = {
       def recurse(t: Type): List[Type.Name] = t match {
         case name: Type.Name => List(name)
-        case Type.Apply(_, args) => args.flatMap(recurse).toList
+        case Type.Apply(name, args) => Type.Name(name) :: args.flatMap(recurse).toList
       }
       models.flatMap(recurse)
     }.map(_.name).toSet
