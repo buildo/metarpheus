@@ -7,6 +7,9 @@ import scala.meta.contrib._
 
 package object controller {
 
+  implicit val extractVarMods: Extract[Decl.Def, Mod] =
+    Extract(_.mods)
+
   private[this] def extractMethod(m: Decl.Def): String =
     m.mods.collectFirst {
       case Mod.Annot(Ctor.Ref.Name("query")) => "get"
@@ -77,12 +80,9 @@ package object controller {
 
   def extractRoute(source: Source, t: Defn.Trait): List[intermediate.Route] = {
     val methods = t.collect {
-      case m: Decl.Def if m.mods.collect {
-            case Mod.Annot(Ctor.Ref.Name("query" | "command")) => ()
-          }.nonEmpty && m.mods.collect {
-            case Mod.Annot(Ctor.Ref.Name("metarpheusIgnore")) => ()
-          }.isEmpty =>
-        m
+      case m: Decl.Def
+          if (m.hasMod(mod"@query") || m.hasMod(mod"@command")) &&
+            !m.hasMod(mod"@metarpheusIgnore") => m
     }
 
     val (controllerName, name) = t.mods
