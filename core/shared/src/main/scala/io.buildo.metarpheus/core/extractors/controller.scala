@@ -79,7 +79,9 @@ package object controller {
     val methods = t.collect {
       case m: Decl.Def if m.mods.collect {
             case Mod.Annot(Ctor.Ref.Name("query" | "command")) => ()
-          }.nonEmpty =>
+          }.nonEmpty && m.mods.collect {
+            case Mod.Annot(Ctor.Ref.Name("metarpheusIgnore")) => ()
+          }.isEmpty =>
         m
     }
 
