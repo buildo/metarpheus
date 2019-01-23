@@ -128,6 +128,14 @@ class ModelSuite extends FunSuite {
               )
             ),
             desc = Some("Surface of the camping site")
+          ),
+          CaseClass(
+            name = "IgnoreMe",
+            members = List(
+              CaseClass.Member(name = "ignore", tpe = Type.Name("String"), desc = None)
+            ),
+            desc = None,
+            isValueClass = false,
           )
         )
     val comparison = DiffShow.diff[List[Model]](expected, result)
