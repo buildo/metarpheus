@@ -69,3 +69,7 @@ object Surface {
   /* Not sure campings exist */
   Another
 }
+
+case class IgnoreMe(
+  ignore: String
+)

@@ -29,6 +29,17 @@ class ApiSuite extends FunSuite {
       ), _, _, _, _, _, _, _) => ()
       // format: on
     }.isDefined)
+
+    assert(api.models.collectFirst {
+      case CaseClass(
+          "IgnoreMe",
+          _,
+          _,
+          _,
+          _
+          ) =>
+        ()
+    }.isEmpty)
   }
 
 }
