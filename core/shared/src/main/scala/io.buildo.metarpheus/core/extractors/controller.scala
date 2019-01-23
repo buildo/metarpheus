@@ -82,7 +82,8 @@ package object controller {
     val methods = t.collect {
       case m: Decl.Def
           if (m.hasMod(mod"@query") || m.hasMod(mod"@command")) &&
-            !m.hasMod(mod"@metarpheusIgnore") => m
+            !m.hasMod(mod"@metarpheusIgnore") =>
+        m
     }
 
     val (controllerName, name) = t.mods

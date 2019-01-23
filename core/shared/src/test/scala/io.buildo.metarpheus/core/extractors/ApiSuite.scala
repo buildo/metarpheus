@@ -32,7 +32,7 @@ class ApiSuite extends FunSuite {
 
     assert(api.models.collectFirst {
       case CaseClass(
-          "IgoreMe",
+          "IgnoreMe",
           _,
           _,
           _,
