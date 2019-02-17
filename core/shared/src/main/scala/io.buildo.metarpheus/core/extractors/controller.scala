@@ -61,9 +61,9 @@ package object controller {
   private[this] def extractReturnType(m: Decl.Def): intermediate.Type =
     m.decltpe
       .collect {
-        case Type.Apply(Type.Name(_), Seq(tpe)) =>
-          tpeToIntermediate(tpe)
         case Type.Apply(Type.Name(_), Seq(Type.Apply(Type.Name(_), Seq(_, tpe)))) =>
+          tpeToIntermediate(tpe)
+        case Type.Apply(Type.Name(_), Seq(tpe)) =>
           tpeToIntermediate(tpe)
       }
       .headOption
