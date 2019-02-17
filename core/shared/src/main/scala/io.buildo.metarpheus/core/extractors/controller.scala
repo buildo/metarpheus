@@ -61,7 +61,9 @@ package object controller {
   private[this] def extractReturnType(m: Decl.Def): intermediate.Type =
     m.decltpe
       .collect {
-        case Type.Apply(Type.Name("Future"), Seq(Type.Apply(Type.Name("Either"), Seq(_, tpe)))) =>
+        case Type.Apply(Type.Name(_), Seq(Type.Apply(Type.Name(_), Seq(_, tpe)))) =>
+          tpeToIntermediate(tpe)
+        case Type.Apply(Type.Name(_), Seq(tpe)) =>
           tpeToIntermediate(tpe)
       }
       .headOption
@@ -71,7 +73,9 @@ package object controller {
           |
           |  ${m.syntax}
           |
-          |It should be in the form of Future[Either[A, B]].
+          |The return type can be of two types:
+          | - F[E[_, Result]]
+          | - F[Result],
         """.stripMargin)
       }
 

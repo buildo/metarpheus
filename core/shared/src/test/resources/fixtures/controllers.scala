@@ -62,6 +62,16 @@ trait CampingController {
 
   @command @metarpheusIgnore
   def ignoreMe(ignore: IgnoreMe): Future[Either[String, String]]
+
+  @query
+  def taglessFinalRouteV1(
+    input: String
+  ): F[String]
+
+  @query
+  def taglessFinalRouteV2(
+    input: String
+  ): F[E[Exception, String]]
 }
 
 class CampingControllerImpl(
@@ -93,4 +103,10 @@ class CampingControllerImpl(
 
   @command
   def ignoreMe(ignore: IgnoreMe): Future[Either[String, String]] = ???
+
+  @query
+  def taglessFinalRouteV1(input: String): F[String] = ???
+
+  @query
+  def taglessFinalRouteV2(input: String): F[E[Exception, String]] = ???
 }
