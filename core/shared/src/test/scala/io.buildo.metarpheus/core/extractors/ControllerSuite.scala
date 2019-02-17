@@ -171,6 +171,50 @@ class ControllerSuite extends FunSuite {
             ctrl = List("campingController", "create"),
             desc = Some("create a camping"),
             name = List("campingController", "create")
+          ),
+          Route(
+            method = "get",
+            route = List(
+              RouteSegment.String("campings"),
+              RouteSegment.String("taglessFinalRouteV1")
+            ),
+            params = List(
+              RouteParam(
+                Some("input"),
+                Type.Name("String"),
+                true,
+                None,
+                inBody = false
+              )
+            ),
+            authenticated = false,
+            returns = Type.Name("String"),
+            body = None,
+            ctrl = List("campingController", "taglessFinalRouteV1"),
+            desc = None,
+            name = List("campingController", "taglessFinalRouteV1")
+          ),
+          Route(
+            method = "get",
+            route = List(
+              RouteSegment.String("campings"),
+              RouteSegment.String("taglessFinalRouteV2")
+            ),
+            params = List(
+              RouteParam(
+                Some("input"),
+                Type.Name("String"),
+                true,
+                None,
+                inBody = false
+              )
+            ),
+            authenticated = false,
+            returns = Type.Name("String"),
+            body = None,
+            ctrl = List("campingController", "taglessFinalRouteV2"),
+            desc = None,
+            name = List("campingController", "taglessFinalRouteV2")
           )
         ).toString
     )
