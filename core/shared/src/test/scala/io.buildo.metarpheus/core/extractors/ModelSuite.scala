@@ -11,7 +11,6 @@ import extractors._
 class ModelSuite extends FunSuite {
   lazy val parsed = {
     import scala.meta._
-    import scala.meta.dialects.Scala211
     Fixtures.models.parse[Source].get
   }
 

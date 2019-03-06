@@ -9,7 +9,6 @@ import extractors._
 class ApiSuite extends FunSuite {
   lazy val parsed = {
     import scala.meta._
-    import scala.meta.dialects.Scala211
     List(
       Fixtures.models.parse[Source].get,
       Fixtures.controllers.parse[Source].get

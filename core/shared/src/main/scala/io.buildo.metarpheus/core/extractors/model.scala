@@ -30,9 +30,9 @@ package object model {
     */
   def extractCaseClass(caseClassDefnInfo: CaseClassDefnInfo): intermediate.CaseClass = {
     val CaseClassDefnInfo(defn, comment) = caseClassDefnInfo
-    val isValueClass = defn.templ.parents.exists(_.syntax == "AnyVal")
+    val isValueClass = defn.templ.inits.exists(_.syntax == "AnyVal")
     val className = defn.name.value
-    val Ctor.Primary(_, Ctor.Ref.Name("this"), List(plist)) = defn.ctor
+    val Ctor.Primary(_, _: Name.Anonymous, List(plist)) = defn.ctor
     val (classDesc, tags) = extractDescAndTagsFromComment(comment)
     // FIXME fail if unmatched parameter descriptions are found
     val paramDescs = tags.collect { case p: ParamDesc => p }
@@ -65,7 +65,7 @@ package object model {
     source
       .collect {
         case c: Defn.Trait if c.mods.collectFirst {
-              case Mod.Annot(Ctor.Ref.Name("enum" | "indexedEnum")) => ()
+              case Mod.Annot(Init(Name("enum" | "indexedEnum"), _, _)) => ()
             }.isDefined =>
           c
       }
@@ -84,17 +84,13 @@ package object model {
                     case _: Mod.Sealed => ()
                   }.isDefined &&
                     o.templ.stats
-                      .map(
-                        x =>
-                          x.forall {
-                            case c: Defn.Object if c.mods.collectFirst {
-                                  case _: Mod.Case => ()
-                                }.isDefined =>
-                              true
-                            case _ => false
-                        }
-                      )
-                      .getOrElse(false)
+                      .forall {
+                        case c: Defn.Object if c.mods.collectFirst {
+                              case _: Mod.Case => ()
+                            }.isDefined =>
+                          true
+                        case _ => false
+                      }
                 case _ => false
               }
               .toList
@@ -116,7 +112,7 @@ package object model {
   )(caseEnumDefnInfo: CaseEnumDefnInfo): intermediate.CaseEnum = {
 
     def membersFromTempl(t: Template): List[intermediate.CaseEnum.Member] = {
-      t.stats.get.collect {
+      t.stats.collect {
         case o @ Defn.Object(_, Term.Name(memberName), _) => {
           val comment = findRelatedComment(source, o)
           val (memberDesc, _) = extractDescAndTagsFromComment(comment)

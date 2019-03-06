@@ -9,7 +9,6 @@ import extractors._
 class ControllerSuite extends FunSuite {
   lazy val parsed = {
     import scala.meta._
-    import scala.meta.dialects.Scala211
     Fixtures.controllers.parse[Source].get
   }
 

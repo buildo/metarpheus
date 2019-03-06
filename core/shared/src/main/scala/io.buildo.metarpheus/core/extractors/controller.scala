@@ -7,13 +7,10 @@ import scala.meta.contrib._
 
 package object controller {
 
-  implicit val extractVarMods: Extract[Decl.Def, Mod] =
-    Extract(_.mods)
-
   private[this] def extractMethod(m: Decl.Def): String =
     m.mods.collectFirst {
-      case Mod.Annot(Ctor.Ref.Name("query")) => "get"
-      case Mod.Annot(Ctor.Ref.Name("command")) => "post"
+      case Mod.Annot(Init(Name("query"), _, _)) => "get"
+      case Mod.Annot(Init(Name("command"), _, _)) => "post"
     }.get
 
   private[this] val authType = Type.Name("Auth")
@@ -92,7 +89,7 @@ package object controller {
 
     val (controllerName, name) = t.mods
       .collectFirst {
-        case Mod.Annot(Term.Apply(Ctor.Ref.Name("path"), Seq(Lit(n: String)))) => (t.name.value, n)
+        case Mod.Annot(Init(Name("path"), _, Seq(Seq(Lit.String(n))))) => (t.name.value, n)
       }
       .getOrElse(t.name.value, t.name.value)
 
