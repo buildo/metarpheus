@@ -2,7 +2,7 @@ enablePlugins(GitVersioning)
 
 lazy val commonSettings = Seq(
   organization := "io.buildo",
-  scalaVersion := "2.12.4",
+  scalaVersion := "2.12.8",
   licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
   bintrayOrganization := Some("buildo"),
   bintrayVcsUrl := Some("git@github.com:buildo/metarpheus"),
@@ -16,8 +16,8 @@ lazy val commonSettings = Seq(
 )
 
 lazy val noPublishSettings = Seq(
-  publish := (),
-  publishLocal := (),
+  publish := (()),
+  publishLocal := (()),
   publishArtifact := false
 )
 
@@ -39,8 +39,8 @@ lazy val core = crossProject
     commonSettings,
     name := "metarpheus-core",
     libraryDependencies ++= Seq(
-      "org.scalameta" %%% "scalameta" % "1.8.0",
-      "org.scalameta" %%% "contrib" % "1.8.0",
+      "org.scalameta" %%% "scalameta" % "4.1.0",
+      "org.scalameta" %%% "contrib" % "4.1.0",
       "org.scalatest" %%% "scalatest" % "3.0.1" % Test,
       "ai.x" %% "diff" % "2.0" % Test
     )

@@ -17,7 +17,7 @@ case class Camping[A](
   size: Int,
   location: CampingLocation,
   rating: CampingRating,
-  a: A
+  a: A,
 )
 
 /**
