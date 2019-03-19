@@ -1,7 +1,7 @@
 {
   "name": "metarpheus",
   "main": "index.js",
-  "version": "1.3.0",
+  "version": "1.3.6",
   "files": [
     "index.js"
   ],
@@ -9,8 +9,5 @@
     "prepublish": "export current=$PWD && cd ../.. && sbt -mem 2048 \"project jsFacade\" clean npmUpdate fullOptJS && cd $current && cp ../target/scala-2.12/scalajs-bundler/main/metarpheus-js-facade-opt.js index.js"
   },
   "author": "buildo",
-  "license": "MIT",
-  "dependencies": {
-    "shelljs": "0.7.7"
-  }
+  "license": "MIT"
 }

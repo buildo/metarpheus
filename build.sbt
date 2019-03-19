@@ -39,8 +39,8 @@ lazy val core = crossProject
     commonSettings,
     name := "metarpheus-core",
     libraryDependencies ++= Seq(
-      "org.scalameta" %%% "scalameta" % "4.1.0",
-      "org.scalameta" %%% "contrib" % "4.1.0",
+      "org.scalameta" %%% "scalameta" % "4.1.5",
+      "org.scalameta" %%% "contrib" % "4.1.5",
       "org.scalatest" %%% "scalatest" % "3.0.1" % Test,
       "ai.x" %% "diff" % "2.0" % Test
     )
